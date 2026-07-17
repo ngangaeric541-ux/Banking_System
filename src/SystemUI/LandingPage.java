@@ -410,7 +410,7 @@ loginDate.setText(
     centerPanel.add(loanValue, gbc);
 
     JLabel loanLimit = new JLabel("Loan Limit");
-    JLabel loanLimitValue = new JLabel("KES 50,000");
+    JLabel loanLimitValue = new JLabel("KES " + CurrentUser.getLimit());
 
     gbc.gridx = 0;
     gbc.gridy = 8;

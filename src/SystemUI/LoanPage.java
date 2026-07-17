@@ -402,6 +402,10 @@ public class LoanPage extends JFrame{
 
         con.commit();
         con.setAutoCommit(true);
+        
+        CurrentUser.getAllInfo(CurrentUser.getUserId());
+        
+        refreshLoanInfo();
 
         JOptionPane.showMessageDialog(this,
                 "Loan approved successfully.");
@@ -657,15 +661,22 @@ public class LoanPage extends JFrame{
         ps7.setLong(1, CurrentUser.getUserId());
 
         ps7.executeUpdate();
-
+         
         con.commit();
 
         con.setAutoCommit(true);
+        
+        CurrentUser.getAllInfo(CurrentUser.getUserId());
+        
+        refreshLoanInfo();
+        
+        amountField.setText("");
+
 
         JOptionPane.showMessageDialog(this,
                 "Loan repaid successfully.");
         
-        CurrentUser.getAllInfo(CurrentUser.getUserId());
+       
         
         
 
@@ -692,6 +703,31 @@ public class LoanPage extends JFrame{
     }
 
 }//end of repay logic
+      
+      
+       // =====================================================
+        //      REFRESH THE USER DETAILS AFTER EVERY TRANSACTION
+        // =====================================================
+      
+      private void refreshLoanInfo() {
+
+    CurrentUser.getAllInfo(CurrentUser.getUserId());
+
+    availableLimit.setText("KES " + CurrentUser.getLimit());
+
+    outstandingLoan.setText("KES " + CurrentUser.getCurrLoan());
+
+    if(CurrentUser.getCurrLoan() == 0){
+
+        loanStatus.setText("No Active Loan");
+
+    }else{
+
+        loanStatus.setText(CurrentUser.getStatus());
+
+    }
+
+}
       
       
      
