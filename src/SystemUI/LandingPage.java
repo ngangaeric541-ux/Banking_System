@@ -4,12 +4,13 @@
  */
 package SystemUI;
 
+
 import static SystemUI.DatabaseCon.con;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -18,8 +19,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import java.sql.*;
+import java.awt.Font;
 
 import java.awt.event.ActionListener;
+import java.io.File;
 import static java.lang.Boolean.FALSE;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -32,11 +35,18 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 /**
  *
@@ -61,6 +71,8 @@ public class LandingPage extends JFrame implements ActionListener {
     
     private JButton buyBtn,depositBtn,sendBtn;
     private JTextField depositAmountField,sendAmountField,recipientField,airtimeAmountField;
+    private JLabel recipientNameLabel;
+    private JLabel statusLabel;
 
     
     //--constructor--//
@@ -83,8 +95,8 @@ public class LandingPage extends JFrame implements ActionListener {
    
    
     public static void main(String[] args) {
-        // TODO code application logic here
-        new LandingPage();
+            // TODO code application logic here
+            LandingPage landingPage = new LandingPage();
     }
     
     
@@ -136,26 +148,6 @@ public class LandingPage extends JFrame implements ActionListener {
          add(top,BorderLayout.NORTH);//the panel itself
     }
     
-    
-    /*private void midPanel(){
-        JPanel middle = new JPanel(new FlowLayout(FlowLayout.LEFT,100,10));
-        middle.setPreferredSize(new Dimension(0,70));
-        //loop to create buttons
-        String[] buttons = {"Deposit","Withdraw","Loan"};
-        for(String button : buttons){
-            JButton btn = new JButton(button);
-            btn.setPreferredSize(new Dimension(150,20));//width,height
-            middle.add(btn);
-        }
-        //create a separator
-        JPanel sepPanel = new JPanel(new BorderLayout());
-        JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-        sepPanel.setPreferredSize(new Dimension(0, 2));
-        sepPanel.add(sep, BorderLayout.CENTER);
-        middle.add(sepPanel);
-
-        add(middle, BorderLayout.SOUTH);
-    }*/
     private void sidePanel() {
 
     JPanel leftPanel = new JPanel();
@@ -209,6 +201,14 @@ loginDate.setText(
     // =========================================================
 
     JButton download = new JButton("Download Statement");
+    download.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+                    accSummary();
+            }
+    
+    
+    });
 
     // =========================================================
     //                  SYSTEM STATUS
@@ -390,7 +390,7 @@ loginDate.setText(
     gbc.anchor = GridBagConstraints.WEST;
 
     JLabel accountType = new JLabel("Account Type");
-    JLabel accountValue = new JLabel("Savings Account");
+    JLabel accountValue = new JLabel(CurrentUser.getAccountType());
 
     gbc.gridx = 0;
     gbc.gridy = 6;
@@ -400,7 +400,12 @@ loginDate.setText(
     centerPanel.add(accountValue, gbc);
 
     JLabel loanStatus = new JLabel("Loan Status");
-    JLabel loanValue = new JLabel("No Active Loan");
+    JLabel loanValue = new JLabel();
+    if(CurrentUser.getCurrLoan() == 0.00){
+                loanValue.setText("No active loan");
+        }else{
+                loanValue.setText("KES " + CurrentUser.getStatus());
+        }
 
     gbc.gridx = 0;
     gbc.gridy = 7;
@@ -489,75 +494,204 @@ loginDate.setText(
     
     
     
-    private void showSendPanel() {
+   private void showSendPanel() {
 
     actionPanel.removeAll();
     actionPanel.setLayout(new GridBagLayout());
-    actionPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+    actionPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(10, 10, 10, 10);
+    gbc.insets = new Insets(8,10,8,10);
     gbc.fill = GridBagConstraints.HORIZONTAL;
 
-    // ===== TITLE =====
-    JLabel title = new JLabel("Send Money");
-    title.setFont(new Font("Arial", Font.BOLD, 20));
+    //=========================================================
+    // TITLE
+    //=========================================================
 
-    gbc.gridx = 0; gbc.gridy = 0;
-    gbc.gridwidth = 2;
+    JLabel title = new JLabel("Send Money");
+    title.setFont(new Font("Segoe UI",Font.BOLD,24));
+
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 4;
     gbc.anchor = GridBagConstraints.CENTER;
-    actionPanel.add(title, gbc);
+
+    actionPanel.add(title,gbc);
+
+    //=========================================================
+    // RECIPIENT ACCOUNT
+    //=========================================================
 
     gbc.gridwidth = 1;
     gbc.anchor = GridBagConstraints.WEST;
 
-    // ===== RECIPIENT ACCOUNT =====
-    gbc.gridx = 0; gbc.gridy = 1;
-    actionPanel.add(new JLabel("Recipient Account:"), gbc);
+    gbc.gridx = 0;
+    gbc.gridy = 1;
 
-    recipientField = new JTextField(18);
+    actionPanel.add(
+            new JLabel("Recipient Account"),
+            gbc);
+
+    recipientField = new JTextField(22);
+
     gbc.gridx = 1;
-    actionPanel.add(recipientField, gbc);
+    gbc.gridwidth = 3;
 
-    // ===== AMOUNT =====
-    gbc.gridx = 0; gbc.gridy = 2;
-    actionPanel.add(new JLabel("Amount:"), gbc);
+    actionPanel.add(
+            recipientField,
+            gbc);
 
-    sendAmountField = new JTextField(18);
+    //=========================================================
+    // RECIPIENT DETAILS
+    //=========================================================
+
+    gbc.gridwidth = 1;
+
+    gbc.gridx = 0;
+    gbc.gridy = 2;
+
+    JLabel recLbl =
+            new JLabel("Recipient");
+
+    recLbl.setFont(
+            new Font("Segoe UI",
+                    Font.BOLD,
+                    13));
+
+    actionPanel.add(recLbl,gbc);
+
+    recipientNameLabel =
+            new JLabel("-");
+
+    recipientNameLabel.setFont(
+            new Font("Segoe UI",
+                    Font.PLAIN,
+                    13));
+
     gbc.gridx = 1;
-    actionPanel.add(sendAmountField, gbc);
-    
-    // ===== DATE =====
-    gbc.gridx = 0; gbc.gridy = 4;
-    actionPanel.add(new JLabel("Date:"), gbc);
 
-    JTextField dateField = new JTextField(18);
-    dateField.setText(java.time.LocalDate.now().toString());
-    dateField.setEditable(false); // read-only
+    actionPanel.add(
+            recipientNameLabel,
+            gbc);
+
+    //=========================================================
+
+    gbc.gridx = 2;
+
+    JLabel statLbl =
+            new JLabel("Status");
+
+    statLbl.setFont(
+            new Font("Segoe UI",
+                    Font.BOLD,
+                    13));
+
+    actionPanel.add(statLbl,gbc);
+
+    statusLabel =
+            new JLabel("Waiting...");
+
+    statusLabel.setFont(
+            new Font("Segoe UI",
+                    Font.PLAIN,
+                    13));
+
+    gbc.gridx = 3;
+
+    actionPanel.add(
+            statusLabel,
+            gbc);
+
+    //=========================================================
+    // AMOUNT
+    //=========================================================
+
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+
+    actionPanel.add(
+            new JLabel("Amount (KES)"),
+            gbc);
+
+    sendAmountField =
+            new JTextField(22);
+
     gbc.gridx = 1;
-    actionPanel.add(dateField, gbc);
+    gbc.gridwidth = 3;
 
-    // ===== BUTTONS =====
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+    actionPanel.add(
+            sendAmountField,
+            gbc);
 
-    sendBtn = new JButton("Send");
-    JButton backBtn = new JButton("Back");
+    //=========================================================
+    // BALANCE
+    //=========================================================
 
-    // Simple navigation only
-    backBtn.addActionListener(e -> cardLayout.show(cardPanel, "dashboard"));
+    gbc.gridwidth = 1;
 
-    buttonPanel.add(sendBtn);
-    buttonPanel.add(backBtn);
+    gbc.gridx = 0;
+    gbc.gridy = 4;
 
-    gbc.gridx = 0; gbc.gridy = 5;
-    gbc.gridwidth = 2;
-    gbc.anchor = GridBagConstraints.CENTER;
-    actionPanel.add(buttonPanel, gbc);
-    
+    JLabel balTitle =
+            new JLabel("Available");
+
+    balTitle.setFont(
+            new Font("Segoe UI",
+                    Font.BOLD,
+                    13));
+
+    actionPanel.add(
+            balTitle,
+            gbc);
+
+    gbc.gridx = 1;
+
+    JLabel bal =
+            new JLabel("KES "
+            + CurrentUser.getBalance());
+
+    actionPanel.add(
+            bal,
+            gbc);
+
+    //=========================================================
+    // BUTTONS
+    //=========================================================
+
+    JPanel btnPanel =
+            new JPanel(
+                    new FlowLayout(
+                            FlowLayout.CENTER,
+                            20,
+                            0));
+
+    JButton backBtn =
+            new JButton("Cancel");
+
+    sendBtn =
+            new JButton("Send Money");
+
+    btnPanel.add(backBtn);
+    btnPanel.add(sendBtn);
+
+    gbc.gridx = 0;
+    gbc.gridy = 5;
+    gbc.gridwidth = 4;
+    gbc.insets = new Insets(25,10,10,10);
+
+    actionPanel.add(
+            btnPanel,
+            gbc);
+
+    backBtn.addActionListener(e ->
+            cardLayout.show(cardPanel,
+                    "dashboard"));
+
     sendMoneyLogic();
 
     actionPanel.revalidate();
     actionPanel.repaint();
+
 }
 
 
@@ -1270,7 +1404,15 @@ private void showAirPanel(){
             //      FIND RECIPIENT ACCOUNT
             // =====================================================
 
-            String recipientQuery = "SELECT account_id,user_id " + "FROM accounts " + "WHERE account_number = ?";
+            String recipientQuery =
+                "SELECT a.account_id, " +
+                "a.user_id, " +
+                "u.first_name, " +
+                "u.last_name " +
+                "FROM accounts a " +
+                "JOIN users u " +
+                "ON a.user_id = u.user_id " +
+                "WHERE a.account_number = ?";
 
             PreparedStatement ps1 = con.prepareStatement(recipientQuery);
 
@@ -1280,9 +1422,8 @@ private void showAirPanel(){
 
             if(!rs.next()){
 
-                JOptionPane.showMessageDialog(
-                        LandingPage.this,
-                        "Recipient account not found.");
+                recipientNameLabel.setText("-");
+                statusLabel.setText("❌ Not Found");
 
                 return;
 
@@ -1293,6 +1434,12 @@ private void showAirPanel(){
 
             long recipientUserId =
                     rs.getLong("user_id");
+            
+            String firstName = rs.getString("first_name");
+            String lastName = rs.getString("last_name");
+
+            recipientNameLabel.setText(firstName + " " + lastName);
+            statusLabel.setText("✔ Verified");
 
             // =====================================================
             //      PREVENT SELF TRANSFER
@@ -1463,10 +1610,170 @@ private void showAirPanel(){
     }
 
 });
-            
-    
-    
     }//end of send logic
+
+
+private void accSummary(){
+        //Generate the account summary using PDFBox jar file
+         try{
+
+        DatabaseCon.database_connection();
+
+        String sql =
+                "SELECT transaction_id,"
+                + "transaction_type,"
+                + "amount,"
+                + "created_at "
+                + "FROM transactions "
+                + "WHERE account_id=? "
+                + "ORDER BY created_at DESC";
+
+        PreparedStatement ps =
+                con.prepareStatement(sql);
+
+        ps.setLong(1,
+                CurrentUser.getAccountId());
+
+        ResultSet rs =
+                ps.executeQuery();
+
+        // ============================================
+        // CREATE PDF
+        // ============================================
+        
+        //surpress warnings
+        java.util.logging.Logger.getLogger("org.apache.pdfbox").setLevel(java.util.logging.Level.SEVERE);
+
+        PDDocument document =
+                new PDDocument();
+
+        PDPage page =
+                new PDPage();
+
+        document.addPage(page);
+
+        PDPageContentStream content =
+                new PDPageContentStream(document,page);
+
+        content.beginText();
+
+        content.setFont(
+                new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+                18
+            );
+
+        content.newLineAtOffset(50,750);
+
+        content.showText("GFH Bank");
+
+        content.newLineAtOffset(0,-25);
+
+        content.setFont(
+                new PDType1Font(Standard14Fonts.FontName.HELVETICA),
+                12
+            );
+
+        content.showText(
+                "Customer : "
+                + CurrentUser.getName()
+                + " "
+                + CurrentUser.getLastName());
+
+        content.newLineAtOffset(0,-18);
+
+        content.showText(
+                "Account No : "
+                + CurrentUser.getAccNum());
+
+        content.newLineAtOffset(0,-18);
+
+        content.showText(
+                "Account Type : "
+                + CurrentUser.getAccountType());
+
+        content.newLineAtOffset(0,-18);
+
+        content.showText(
+                "Balance : KES "
+                + CurrentUser.getBalance());
+
+        content.newLineAtOffset(0,-35);
+
+        content.setFont(
+                new PDType1Font(Standard14Fonts.FontName.HELVETICA),
+                12
+            );
+
+        content.showText(
+                "Transactions");
+
+        content.newLineAtOffset(0,-20);
+
+        content.setFont(
+                new PDType1Font(Standard14Fonts.FontName.COURIER),
+                10
+            );;
+
+        // ============================================
+        // LOOP THROUGH TRANSACTIONS
+        // ============================================
+
+        while(rs.next()){
+
+            String line =
+                    rs.getString("transaction_id")
+                    + " | "
+                    + rs.getString("transaction_type")
+                    + " | KES "
+                    + rs.getDouble("amount")
+                    + " | "
+                    + rs.getTimestamp("created_at");
+
+            content.showText(line);
+
+            content.newLineAtOffset(0,-15);
+
+        }
+
+        content.endText();
+
+        content.close();
+
+        JFileChooser chooser =
+        new JFileChooser();
+
+        chooser.setSelectedFile(
+                new File("Statement.pdf"));
+
+        int option =
+                chooser.showSaveDialog(this);
+
+        if(option == JFileChooser.APPROVE_OPTION){
+
+            document.save(
+                    chooser.getSelectedFile());
+
+        }
+
+        document.close();
+
+        JOptionPane.showMessageDialog(this,
+                "Statement downloaded successfully.");
+
+    }catch(Exception ex){
+
+        Logger.getLogger(
+                LandingPage.class.getName())
+                .log(Level.SEVERE,
+                        null,
+                        ex);
+
+    }
+
+
+
+}
+
     
 
 }

@@ -89,7 +89,7 @@ public class LoanPage extends JFrame{
         if(CurrentUser.getCurrLoan() == 0.00){
                 loanStatus.setText("No active loan");
         }else{
-                loanStatus.setText("KES " + CurrentUser.getStatus());
+                loanStatus.setText(CurrentUser.getStatus());
         }
         loanStatus.setFont(new Font("Arial",Font.BOLD,18));
 

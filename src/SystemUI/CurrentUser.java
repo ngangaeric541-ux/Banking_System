@@ -14,6 +14,7 @@ public class CurrentUser {
     private static String email;
     private static String firstName;
     private static String lastName;
+    private static String accountType;
 
     private static long accountId;
     private static String accountNumber;
@@ -27,19 +28,7 @@ public class CurrentUser {
     private static Timestamp lastLogin;
     private static String lastIP;
 
-    public static void set(long id,
-                           String userEmail,
-                           String name,
-                           String jina,
-                           long accId,
-                           String accNumber,
-                           double bal,
-                           double limit,
-                           double loan,
-                           String status,
-                           Timestamp login,
-                           String ip){
-
+    public static void set(long id, String userEmail,String name,String jina,long accId, String accNumber, String accType, double bal,double limit,double loan,String status,Timestamp login,String ip){
         userId = id;
         email = userEmail;
         firstName = name;
@@ -47,6 +36,7 @@ public class CurrentUser {
 
         accountId = accId;
         accountNumber = accNumber;
+        accountType = accType;
 
         balance = bal;
         loanLimit = limit;
@@ -107,6 +97,14 @@ public class CurrentUser {
         return lastIP;
     }
     
+    public static String getAccountType(){
+        return accountType;
+    }
+    
+     // ============================================
+        // GET ALL USER INFO FOR THE DASHBOARD AND LABELS
+        // ============================================
+    
     static void getAllInfo(long userId){
 
     try{
@@ -121,6 +119,7 @@ public class CurrentUser {
                 + "u.email,"
                 + "a.account_id,"
                 + "a.account_number,"
+                + "a.account_type,"
                 + "a.balance,"
                 + "a.loan_limit,"
                 + "a.outstanding_loan,"
@@ -162,6 +161,8 @@ public class CurrentUser {
                     rs.getLong("account_id"),
 
                     rs.getString("account_number"),
+                    
+                    rs.getString("account_type"),
 
                     rs.getDouble("balance"),
 

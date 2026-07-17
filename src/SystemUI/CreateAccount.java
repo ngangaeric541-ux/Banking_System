@@ -26,6 +26,7 @@ import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import java.sql.*;
 import org.mindrot.jbcrypt.BCrypt;
 
+
 public class CreateAccount extends JFrame implements ActionListener{
     GridBagLayout gbl;
     GridBagConstraints gbc;
