@@ -1744,7 +1744,6 @@ private void accSummary(){
 
         chooser.setSelectedFile(
                 new File("Statement.pdf"));
-
         int option =
                 chooser.showSaveDialog(this);
 
@@ -1753,12 +1752,13 @@ private void accSummary(){
             document.save(
                     chooser.getSelectedFile());
 
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Statement downloaded successfully.");
+
         }
 
         document.close();
-
-        JOptionPane.showMessageDialog(this,
-                "Statement downloaded successfully.");
 
     }catch(Exception ex){
 

@@ -41,7 +41,6 @@ public class CurrentUser {
         balance = bal;
         loanLimit = limit;
         outstandingLoan = loan;
-
         loanStatus = status;
 
         lastLogin = login;

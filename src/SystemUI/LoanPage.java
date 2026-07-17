@@ -46,6 +46,7 @@ public class LoanPage extends JFrame{
         setVisible(true);
 
     }
+    
 
     // =========================================================
     //                  BUILD USER INTERFACE
@@ -63,12 +64,10 @@ public class LoanPage extends JFrame{
 
         JLabel title = new JLabel("Loan Services");
         title.setFont(new Font("Arial",Font.BOLD,26));
-
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-
         add(title,gbc);
 
         gbc.gridwidth = 1;
@@ -79,13 +78,11 @@ public class LoanPage extends JFrame{
         // =====================================================
 
         JLabel statusTitle = new JLabel("Loan Status");
-
         gbc.gridx = 0;
         gbc.gridy = 1;
-
         add(statusTitle,gbc);
-
         loanStatus = new JLabel();
+        
         if(CurrentUser.getCurrLoan() == 0.00){
                 loanStatus.setText("No active loan");
         }else{
@@ -94,7 +91,6 @@ public class LoanPage extends JFrame{
         loanStatus.setFont(new Font("Arial",Font.BOLD,18));
 
         gbc.gridx = 1;
-
         add(loanStatus,gbc);
 
         // =====================================================
@@ -102,15 +98,12 @@ public class LoanPage extends JFrame{
         // =====================================================
 
         JLabel limitTitle = new JLabel("Available Loan Limit");
-
         gbc.gridx = 0;
         gbc.gridy = 2;
-
         add(limitTitle,gbc);
 
         availableLimit = new JLabel("KES " + CurrentUser.getLimit());
         availableLimit.setFont(new Font("Arial",Font.BOLD,18));
-
         gbc.gridx = 1;
 
         add(availableLimit,gbc);
@@ -120,17 +113,13 @@ public class LoanPage extends JFrame{
         // =====================================================
 
         JLabel outstandingTitle = new JLabel("Outstanding Loan");
-
         gbc.gridx = 0;
         gbc.gridy = 3;
-
         add(outstandingTitle,gbc);
 
         outstandingLoan = new JLabel("KES " + CurrentUser.getCurrLoan());
         outstandingLoan.setFont(new Font("Arial",Font.BOLD,18));
-
         gbc.gridx = 1;
-
         add(outstandingLoan,gbc);
 
         // =====================================================
@@ -138,17 +127,13 @@ public class LoanPage extends JFrame{
         // =====================================================
 
         JLabel amount = new JLabel("Amount");
-
         gbc.gridx = 0;
         gbc.gridy = 4;
-
         add(amount,gbc);
-
+        
         amountField = new JTextField(18);
         amountField.setFont(new Font("Arial",Font.PLAIN,18));
-
         gbc.gridx = 1;
-
         add(amountField,gbc);
 
         // =====================================================
@@ -199,7 +184,6 @@ public class LoanPage extends JFrame{
         borrowBtn.addActionListener(new ActionListener(){
         @Override
         public void actionPerformed(ActionEvent ae){
-
 
                 if(amountField.getText().isEmpty() ){
                         JOptionPane.showMessageDialog(LoanPage.this, "Please fill in the field");
@@ -278,12 +262,8 @@ public class LoanPage extends JFrame{
         ResultSet rs = ps.executeQuery();
 
         if(!rs.next()){
-
-            JOptionPane.showMessageDialog(this,
-                    "Account not found.");
-
+            JOptionPane.showMessageDialog(this, "Account not found.");
             return;
-
         }
 
         accountId = rs.getLong("account_id");
@@ -295,12 +275,8 @@ public class LoanPage extends JFrame{
         // =====================================================
 
         if(amt > avlLimit){
-
-            JOptionPane.showMessageDialog(this,
-                    "Loan exceeds available limit.");
-
+            JOptionPane.showMessageDialog(this, "Loan exceeds available limit.");
             con.rollback();
-
             return;
 
         }
@@ -309,34 +285,21 @@ public class LoanPage extends JFrame{
         //      CREDIT USER ACCOUNT
         // =====================================================
 
-        String credit =
-                "UPDATE accounts "
-                + "SET balance = balance + ? "
-                + "WHERE account_id = ?";
-
+        String credit = "UPDATE accounts SET balance = balance + ? WHERE account_id = ?";
         PreparedStatement ps1 = con.prepareStatement(credit);
-
         ps1.setDouble(1, amt);
         ps1.setLong(2, accountId);
-
         ps1.executeUpdate();
 
         // =====================================================
         //      REDUCE LOAN LIMIT
         // =====================================================
 
-        String updateLoan =
-                "UPDATE accounts "
-                + "SET loan_limit = loan_limit - ?, "
-                + "outstanding_loan = outstanding_loan + ? "
-                + "WHERE account_id = ?";
-
+        String updateLoan = "UPDATE accounts SET loan_limit = loan_limit - ?, outstanding_loan = outstanding_loan + ? WHERE account_id = ?";
         PreparedStatement ps2 = con.prepareStatement(updateLoan);
-
         ps2.setDouble(1, amt);
         ps2.setDouble(2, amt);
         ps2.setLong(3, accountId);
-
         ps2.executeUpdate();
 
         // =====================================================
@@ -361,8 +324,7 @@ public class LoanPage extends JFrame{
                 + "'ACTIVE',"
                 + "NOW())";
 
-        PreparedStatement ps3 =
-                con.prepareStatement(insertLoan);
+        PreparedStatement ps3 = con.prepareStatement(insertLoan);
 
         ps3.setLong(1, accountId);
         ps3.setLong(2, CurrentUser.getUserId());
@@ -385,8 +347,7 @@ public class LoanPage extends JFrame{
                 + "created_at)"
                 + " VALUES(?,?,?,?,?,NOW())";
 
-        PreparedStatement ps4 =
-                con.prepareStatement(transaction);
+        PreparedStatement ps4 = con.prepareStatement(transaction);
 
         ps4.setString(1, LandingPage.generateID());
         ps4.setLong(2, accountId);
@@ -407,8 +368,7 @@ public class LoanPage extends JFrame{
         
         refreshLoanInfo();
 
-        JOptionPane.showMessageDialog(this,
-                "Loan approved successfully.");
+        JOptionPane.showMessageDialog(this,"Loan approved successfully.");
 
         amountField.setText("");
 
@@ -421,16 +381,13 @@ public class LoanPage extends JFrame{
 
         }catch(SQLException ex1){
 
-            Logger.getLogger(LoanPage.class.getName())
-                    .log(Level.SEVERE, null, ex1);
+            Logger.getLogger(LoanPage.class.getName()).log(Level.SEVERE, null, ex1);
 
         }
 
-        Logger.getLogger(LoanPage.class.getName())
-                .log(Level.SEVERE, null, ex);
+        Logger.getLogger(LoanPage.class.getName()).log(Level.SEVERE, null, ex);
 
-        JOptionPane.showMessageDialog(this,
-                "Loan request failed.");
+        JOptionPane.showMessageDialog(this,"Loan request failed.");
 
     }
 
@@ -454,17 +411,13 @@ public class LoanPage extends JFrame{
                 + "FROM accounts "
                 + "WHERE user_id=?";
 
-        PreparedStatement ps =
-                con.prepareStatement(accInfo);
-
+        PreparedStatement ps =con.prepareStatement(accInfo);
         ps.setLong(1,CurrentUser.getUserId());
-
         ResultSet rs = ps.executeQuery();
 
         if(!rs.next()){
 
-            JOptionPane.showMessageDialog(this,
-                    "Account not found.");
+            JOptionPane.showMessageDialog(this, "Account not found.");
 
             return;
 
@@ -476,38 +429,26 @@ public class LoanPage extends JFrame{
 
         double loanLimit = rs.getDouble("loan_limit");
 
-        double outstandingLoan =
-                rs.getDouble("outstanding_loan");
+        double outstandingLoan = rs.getDouble("outstanding_loan");
 
         // =====================================================
         //      VALIDATION
         // =====================================================
 
         if(balance < amt){
-
-            JOptionPane.showMessageDialog(this,
-                    "Insufficient balance.");
-
+            JOptionPane.showMessageDialog(this, "Insufficient balance.");
             return;
-
         }
 
         if(outstandingLoan <= 0){
-
-            JOptionPane.showMessageDialog(this,
-                    "No outstanding loan.");
-
+            JOptionPane.showMessageDialog(this, "No outstanding loan.");
             return;
 
         }
 
         if(amt > outstandingLoan){
-
-            JOptionPane.showMessageDialog(this,
-                    "Amount exceeds outstanding loan.");
-
+            JOptionPane.showMessageDialog(this, "Amount exceeds outstanding loan.");
             return;
-
         }
 
         // =====================================================
@@ -519,12 +460,10 @@ public class LoanPage extends JFrame{
                 + "SET balance = balance - ? "
                 + "WHERE account_id=?";
 
-        PreparedStatement ps1 =
-                con.prepareStatement(deduct);
+        PreparedStatement ps1 =con.prepareStatement(deduct);
 
         ps1.setDouble(1,amt);
         ps1.setLong(2,accountId);
-
         ps1.executeUpdate();
 
         // =====================================================
@@ -537,13 +476,10 @@ public class LoanPage extends JFrame{
                 + "outstanding_loan = outstanding_loan - ? "
                 + "WHERE account_id=?";
 
-        PreparedStatement ps2 =
-                con.prepareStatement(updateLoan);
-
+        PreparedStatement ps2 = con.prepareStatement(updateLoan);
         ps2.setDouble(1,amt);
         ps2.setDouble(2,amt);
         ps2.setLong(3,accountId);
-
         ps2.executeUpdate();
 
         // =====================================================
@@ -557,22 +493,15 @@ public class LoanPage extends JFrame{
                 + "AND loan_status='ACTIVE' "
                 + "ORDER BY borrowed_at ASC";
 
-        PreparedStatement ps3 =
-                con.prepareStatement(activeLoans);
-
+        PreparedStatement ps3 = con.prepareStatement(activeLoans);
         ps3.setLong(1,CurrentUser.getUserId());
-
         ResultSet rs2 = ps3.executeQuery();
 
         double remaining = amt;
 
         while(rs2.next() && remaining > 0){
-
-            long loanId =
-                    rs2.getLong("loan_id");
-
-            double loanBal =
-                    rs2.getDouble("remaining_balance");
+            long loanId = rs2.getLong("loan_id");
+            double loanBal = rs2.getDouble("remaining_balance");
 
             if(remaining >= loanBal){
 
@@ -582,13 +511,9 @@ public class LoanPage extends JFrame{
                         + "loan_status='PAID' "
                         + "WHERE loan_id=?";
 
-                PreparedStatement ps4 =
-                        con.prepareStatement(paid);
-
+                PreparedStatement ps4 =con.prepareStatement(paid);
                 ps4.setLong(1,loanId);
-
                 ps4.executeUpdate();
-
                 remaining -= loanBal;
 
             }else{
@@ -598,15 +523,9 @@ public class LoanPage extends JFrame{
                         + "SET remaining_balance=? "
                         + "WHERE loan_id=?";
 
-                PreparedStatement ps5 =
-                        con.prepareStatement(partial);
-
-                ps5.setDouble(1,
-                        loanBal - remaining);
-
-                ps5.setLong(2,
-                        loanId);
-
+                PreparedStatement ps5 =con.prepareStatement(partial);
+                ps5.setDouble(1,loanBal - remaining);
+                ps5.setLong(2,loanId);
                 ps5.executeUpdate();
 
                 remaining = 0;
@@ -629,24 +548,12 @@ public class LoanPage extends JFrame{
                 + "created_at)"
                 + " VALUES(?,?,?,?,?,NOW())";
 
-        PreparedStatement ps6 =
-                con.prepareStatement(txn);
-
-        ps6.setString(1,
-                LandingPage.generateID());
-
-        ps6.setLong(2,
-                accountId);
-
-        ps6.setLong(3,
-                CurrentUser.getUserId());
-
-        ps6.setDouble(4,
-                amt);
-
-        ps6.setString(5,
-                "REPAY");
-
+        PreparedStatement ps6 =con.prepareStatement(txn);
+        ps6.setString(1,LandingPage.generateID());
+        ps6.setLong(2,accountId);
+        ps6.setLong(3,CurrentUser.getUserId());
+        ps6.setDouble(4,amt);
+        ps6.setString(5, "REPAY");
         ps6.executeUpdate();
         
         String updateStatus =
@@ -673,8 +580,7 @@ public class LoanPage extends JFrame{
         amountField.setText("");
 
 
-        JOptionPane.showMessageDialog(this,
-                "Loan repaid successfully.");
+        JOptionPane.showMessageDialog(this, "Loan repaid successfully.");
         
        
         
@@ -690,15 +596,11 @@ public class LoanPage extends JFrame{
 
         }catch(SQLException e){
 
-            Logger.getLogger(
-                    LoanPage.class.getName())
-                    .log(Level.SEVERE,null,e);
+            Logger.getLogger( LoanPage.class.getName()).log(Level.SEVERE,null,e);
 
         }
 
-        Logger.getLogger(
-                LoanPage.class.getName())
-                .log(Level.SEVERE,null,ex);
+        Logger.getLogger( LoanPage.class.getName()) .log(Level.SEVERE,null,ex);
 
     }
 

@@ -5,6 +5,7 @@
 package SystemUI;
 
 import static SystemUI.DatabaseCon.con;
+import java.awt.CardLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -28,115 +29,146 @@ import javax.swing.JTextField;
 import java.sql.*;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
 import org.mindrot.jbcrypt.BCrypt;
 public class ResetPassword extends JFrame implements ActionListener {
     
-    GridBagLayout gbl;
-    GridBagConstraints gbc;
-    ResultSet rs;
-    JTextField userName,emailField;
-    JButton button,resetPasswordBtn,submit;
-    JPasswordField newPassField, confirmPassField;
-    JLabel username,newPassLabel,confirmPassLabel,title,emailLabel;
-    JCheckBox showPassword;
+   private GridBagLayout gbl;
+   private GridBagConstraints gbc;
+   private ResultSet rs;
+   private JTextField userName,emailField;
+   private JButton button,resetPasswordBtn,submit;
+   private JPasswordField newPassField, confirmPassField;
+   private JLabel username,newPassLabel,confirmPassLabel,title,emailLabel;
+   private JCheckBox showPassword;
+   private CardLayout cardLayout;
+   private JPanel cardPanel;
     
     public ResetPassword() {
 
-    super("Reset Password");
-    setSize(600, 400);
+    super("Password Recovery");
+
+    setSize(700,500);
     setLocationRelativeTo(null);
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-    GridBagLayout gbl = new GridBagLayout();
-    setLayout(gbl);
+    cardLayout = new CardLayout();
+    cardPanel = new JPanel(cardLayout);
+
+    /*=========================================================
+                        VERIFY PANEL
+    =========================================================*/
+
+    JPanel verifyPanel = new JPanel();
+
+    GridBagLayout verifyLayout = new GridBagLayout();
+    verifyPanel.setLayout(verifyLayout);
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(10, 10, 10, 10);
+
+    gbc.insets = new Insets(15,15,15,15);
     gbc.fill = GridBagConstraints.HORIZONTAL;
 
-    /* ===== TITLE ===== */
-    title = new JLabel("<html><u>Password Reset Page</u></html>");
-    title.setFont(new Font("SansSerif", Font.BOLD, 20));
+    title = new JLabel("Reset Your Password");
+    title.setFont(new Font("SansSerif",Font.BOLD,28));
     title.setHorizontalAlignment(SwingConstants.CENTER);
     gbc.gridx = 0;
     gbc.gridy = 0;
-    gbc.gridwidth = 3;
-    add(title, gbc);
+    gbc.gridwidth = 2;
+    verifyPanel.add(title,gbc);
 
-    gbc.gridwidth = 1;
-
-    /* ===== EMAIL ===== */
-    emailLabel = new JLabel("Email:");
-    gbc.gridx = 0;
+    JLabel subtitle = new JLabel("Recover access to your account securely.");
+    subtitle.setHorizontalAlignment(SwingConstants.CENTER);
     gbc.gridy = 1;
-    add(emailLabel, gbc);
+    verifyPanel.add(subtitle,gbc);
     
+    gbc.gridwidth = 1;
+    
+    emailLabel = new JLabel("Registered Email");
+    gbc.gridx = 0;
+    gbc.gridy = 2;
+    verifyPanel.add(emailLabel,gbc);
+
     emailField = new JTextField(25);
     gbc.gridx = 1;
-    gbc.gridy = 1;
+    verifyPanel.add(emailField,gbc);
+
+    submit = new JButton("Verify Email");
+    gbc.gridx = 0;
+    gbc.gridy = 3;
     gbc.gridwidth = 2;
-    add(emailField, gbc);
+    verifyPanel.add(submit,gbc);
+    submit.addActionListener(this);
 
-    gbc.gridwidth = 1;
+    /*=========================================================
+                    PASSWORD PANEL
+    =========================================================*/
 
-    submit = new JButton("Submit");
-    gbc.gridx = 1;
-    gbc.gridy = 2;
-    gbc.anchor = GridBagConstraints.CENTER;
-    submit.addActionListener(this );
-    add(submit, gbc);
+    JPanel passwordPanel = new JPanel();
 
-    /* ===== NEW PASSWORD ===== */
-    newPassLabel = new JLabel("New Password:");
-    gbc.gridx = 0;
-    gbc.gridy = 3;
-    add(newPassLabel, gbc);
+    GridBagLayout passwordLayout = new GridBagLayout();
+    passwordPanel.setLayout(passwordLayout);
+
+    GridBagConstraints gbc2 = new GridBagConstraints();
+
+    gbc2.insets = new Insets(15,15,15,15);
+    gbc2.fill = GridBagConstraints.HORIZONTAL;
+
+    JLabel passwordTitle =new JLabel("Create New Password");
+    passwordTitle.setFont( new Font( "SansSerif", Font.BOLD, 24));
+    passwordTitle.setHorizontalAlignment(SwingConstants.CENTER);
+    gbc2.gridx = 0;
+    gbc2.gridy = 0;
+    gbc2.gridwidth = 3;
+    passwordPanel.add(passwordTitle,gbc2);
     
-    newPassField = new JPasswordField(20);
-    gbc.gridx = 1;
-    gbc.gridy = 3;
-    add(newPassField, gbc);
+    gbc2.gridwidth = 1;
 
-    /* ===== CONFIRM PASSWORD ===== */
-    confirmPassLabel = new JLabel("Confirm Password:");
-    gbc.gridx = 0;
-    gbc.gridy = 4;
-    add(confirmPassLabel, gbc);
+    newPassLabel =new JLabel("New Password");
+    gbc2.gridx = 0;
+    gbc2.gridy = 1;
+    passwordPanel.add(newPassLabel,gbc2);
+
+    newPassField =new JPasswordField(22);
+    gbc2.gridx = 1;
+    passwordPanel.add(newPassField,gbc2);
     
-    confirmPassField = new JPasswordField(20);
-    gbc.gridx = 1;
-    gbc.gridy = 4;
-    add(confirmPassField, gbc);
+    confirmPassLabel = new JLabel("Confirm Password");
+    gbc2.gridx = 0;
+    gbc2.gridy = 2;
+    passwordPanel.add(confirmPassLabel,gbc2);
 
-    /* ===== SHOW PASSWORD ===== */
-    showPassword = new JCheckBox("Show password");
-    showPassword.setToolTipText("Show password");
-    gbc.gridx = 2;
-    gbc.gridy = 3;
-    gbc.anchor = GridBagConstraints.WEST;
-    add(showPassword, gbc);
-    
+    confirmPassField =new JPasswordField(22);
+    gbc2.gridx = 1;
+    passwordPanel.add(confirmPassField,gbc2);
 
-    /* ===== RESET BUTTON ===== */
-    resetPasswordBtn = new JButton("Reset Password");
-    gbc.gridx = 1;
-    gbc.gridy = 5;
-    gbc.anchor = GridBagConstraints.CENTER;
-    add(resetPasswordBtn, gbc);
+    showPassword = new JCheckBox("Show Passwords");
+    gbc2.gridx = 1;
+    gbc2.gridy = 3;
+    passwordPanel.add(showPassword,gbc2);
 
-    /* ===== INITIAL VISIBILITY ===== */
-    newPassLabel.setVisible(false);
-    newPassField.setVisible(false);
-    confirmPassLabel.setVisible(false);
-    confirmPassField.setVisible(false);
-    showPassword.setVisible(false);
-    resetPasswordBtn.setVisible(false);
+    resetPasswordBtn =new JButton("Update Password");
+    gbc2.gridx = 0;
+    gbc2.gridy = 4;
+    gbc2.gridwidth = 2;
+    passwordPanel.add(resetPasswordBtn,gbc2);
+
+    /*=========================================================
+                        CARDS
+    =========================================================*/
+
+    cardPanel.add(verifyPanel,"verify");
+    cardPanel.add(passwordPanel,"password");
+
+    add(cardPanel);
+
+    cardLayout.show(cardPanel,"verify");
 
     setVisible(true);
-}
 
+}
 
     
     
@@ -156,124 +188,168 @@ public class ResetPassword extends JFrame implements ActionListener {
     
     
     void checkDetails() throws SQLException{
-        //convert the TextField into string
-        String user = emailField.getText();
-        PreparedStatement ps = null;
-        
-        if(user.isEmpty()){
-            JOptionPane.showMessageDialog(this,"Enter a valid email address!");
-        }else{
-            try {
-                DatabaseCon.database_connection();
-                
-                String sql = "SELECT * FROM users WHERE email = ?";
-                
-                ps = con.prepareStatement(sql);
-                ps.setString(1, user);
-                
-                ResultSet rs = ps.executeQuery();
-                
-                    if(rs.next()){
-                       //true
-                    makeVisible();
-                    }else{
-                       //false
-                       JOptionPane.showMessageDialog(this, "E-Mail not found,please enter a valid email!");
-                    }//end of checking method
-                
-               } catch (SQLException ex) {
-                Logger.getLogger(ResetPassword.class.getName()).log(Level.SEVERE, null, ex);
-                 } finally {
-                    ps.close();
-                   }
-         
-        }//end of if block
-    }//end of checkDetails method
-    
-    public void makeVisible() {
-    //make the other fields invisible for submit button    
-    submit.setVisible(false);
-    emailField.setEditable(false);
-    //make new fields visible
-    newPassLabel.setVisible(true);
-    newPassField.setVisible(true);
-    confirmPassLabel.setVisible(true);
-    confirmPassField.setVisible(true);
-    showPassword.setVisible(true);
-    resetPasswordBtn.setVisible(true);
 
-    revalidate();
-    repaint();
-    resaveDetails();
-}
-//end of resaveDetails method
-    
-    private void resaveDetails(){
-        
-        //make the reset button work
-        resetPasswordBtn.addActionListener(new ActionListener(){
-           @Override
-           public void actionPerformed(ActionEvent e){
-              //covert password to readable strings 
-              String newPass = new String(newPassField.getText());
-              String repeatPass = new String(confirmPassField.getText());
-              String email = emailField.getText();
-              
-        if(newPass.isEmpty() || repeatPass.isEmpty()){
-            JOptionPane.showMessageDialog(ResetPassword.this, "Please fill in both fields");
-        }else{
-            if(newPass.equals(repeatPass))
-                {
-                  
-                  //re-encrypt password 
-                  
-                  String updatedPass = BCrypt.hashpw(new String(newPassField.getPassword()), BCrypt.gensalt());
-                  try {
-                      //block of true code
-                      //database connecton and saving
-                      DatabaseCon.database_connection();
-                      
-                      String query = "UPDATE users SET password=? WHERE email=?";
-                      
-                      PreparedStatement update = con.prepareStatement(query);
-                      
-                      update.setString(1, updatedPass);
-                      
-                      update.setString(2, email);
-                      
-                      update.executeUpdate();
-                      
-                      JOptionPane.showMessageDialog(null, "Password reset successful");
-                      
-                      dispose();
-                      
-                      new LoginPage();
-                  
-                  } catch (SQLException ex) {
-                      Logger.getLogger(ResetPassword.class.getName()).log(Level.SEVERE, null, ex);
-                  }
-                }else{
-                  //false
-                  JOptionPane.showMessageDialog(ResetPassword.this,"Password Mismatch!");
-              }
+    String user = emailField.getText();
+    PreparedStatement ps = null;
+    if(user.isEmpty()){
+
+        JOptionPane.showMessageDialog(this, "Please enter your registered email.");
+
+    }else{
+
+        try{
+
+            DatabaseCon.database_connection();
+
+            String sql = "SELECT * FROM users WHERE email = ?";
+
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1,user);
+
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()){
+
+                makeVisible();
+
+            }else{
+
+                JOptionPane.showMessageDialog(this, "Email address not found.");
+
             }
-              
-           }
-        });//end of listener
-        
-        //add a listener to make show password button fully functional for both fields 
-        char confirmEcho = confirmPassField.getEchoChar();
-        char defaultEcho = newPassField.getEchoChar();
-        showPassword.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent event) {
-        boolean show = showPassword.isSelected();
-        newPassField.setEchoChar(show ? (char) 0 : defaultEcho);
-        confirmPassField.setEchoChar(showPassword.isSelected() ? (char) 0 : confirmEcho);
-    }
-});
 
-    
+        }catch(SQLException ex){
+
+            Logger.getLogger( ResetPassword.class.getName()).log(Level.SEVERE,null,ex);
+
+        }finally{
+
+            if(ps != null){
+
+                ps.close();
+
+            }
+
+        }
+
     }
+
+}
+    
+   public void makeVisible(){
+
+    cardLayout.show(cardPanel,"password");
+
+    resaveDetails();
+
+}
+    
+private void resaveDetails(){
+
+    // Prevent duplicate listeners
+    for(ActionListener al : resetPasswordBtn.getActionListeners()){
+        resetPasswordBtn.removeActionListener(al);
+    }
+
+    resetPasswordBtn.addActionListener(new ActionListener(){
+
+        @Override
+        public void actionPerformed(ActionEvent e){
+
+            String newPass =new String(newPassField.getPassword());
+            String repeatPass = new String(confirmPassField.getPassword());
+            String email = emailField.getText();
+
+            if(newPass.isEmpty() || repeatPass.isEmpty()){
+
+                JOptionPane.showMessageDialog( ResetPassword.this, "Please fill in both fields.");
+
+            }else{
+
+                if(newPass.equals(repeatPass)){
+
+                    String updatedPass = BCrypt.hashpw( newPass, BCrypt.gensalt());
+
+                    try{
+
+                        DatabaseCon.database_connection();
+
+                        String query = "UPDATE users " + "SET password=? " + "WHERE email=?";
+
+                        PreparedStatement update = con.prepareStatement(query);
+
+                        update.setString(1,updatedPass);
+
+                        update.setString(2,email);
+
+                        int rows =
+                                update.executeUpdate();
+
+                        if(rows > 0){
+
+                            JOptionPane.showMessageDialog( ResetPassword.this, "Password updated successfully.");
+
+                            dispose();
+
+                            new LoginPage();
+
+                        }else{
+
+                            JOptionPane.showMessageDialog( ResetPassword.this, "Unable to update password.");
+
+                        }
+
+                    }catch(SQLException ex){
+
+                        Logger.getLogger( ResetPassword.class.getName()) .log(Level.SEVERE,null,ex);
+
+                    }
+
+                }else{
+
+                    JOptionPane.showMessageDialog( ResetPassword.this,"Passwords do not match.");
+
+                }
+
+            }
+
+        }
+
+    });
+
+    //======================================================
+    // SHOW PASSWORD
+    //======================================================
+
+    for(ActionListener al : showPassword.getActionListeners()){
+        showPassword.removeActionListener(al);
+    }
+
+    char defaultEcho = newPassField.getEchoChar();
+
+    char confirmEcho = confirmPassField.getEchoChar();
+
+    showPassword.addActionListener(new ActionListener(){
+
+        @Override
+        public void actionPerformed(ActionEvent event){
+
+            boolean show = showPassword.isSelected();
+
+            newPassField.setEchoChar(show ? (char)0 : defaultEcho);
+
+            confirmPassField.setEchoChar( show ? (char)0 : confirmEcho);
+
+        }
+
+    });
+
+}
+    
+        public static void main(String[] args) {
+                new ResetPassword();
+        }
 
 }//end of code
     
