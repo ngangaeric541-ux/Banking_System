@@ -215,6 +215,7 @@ public class LoginPage extends JFrame implements ActionListener {
     login.setBackground(new Color(17,52,88));
     login.setForeground( Color.WHITE);
     login.setFocusable(false);
+    login.putClientProperty("JButton.buttonType", "roundRect");
     login.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     gbc.gridx = 0;
     gbc.gridy = 6;

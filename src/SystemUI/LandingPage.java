@@ -8,6 +8,8 @@ package SystemUI;
 import static SystemUI.DatabaseCon.con;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
@@ -20,6 +22,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import java.sql.*;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -47,6 +52,8 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
 
 /**
  *
@@ -62,6 +69,7 @@ public class LandingPage extends JFrame implements ActionListener {
     private double currentBalance;
     private JLabel txn1;
     private JLabel txn1Time;
+    private JLabel activityTitle;;
 
     private JLabel txn2;
     private JLabel txn2Time;
@@ -81,7 +89,7 @@ public class LandingPage extends JFrame implements ActionListener {
        setSize(1280,600);
         setLocationRelativeTo(null);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
-                setLayout(new BorderLayout(5,5));
+                setLayout(new BorderLayout(5,0));
     topPanel();
    // midPanel();
     sidePanel();
@@ -112,102 +120,159 @@ public class LandingPage extends JFrame implements ActionListener {
     
     private void topPanel(){
          JPanel top = new JPanel(new BorderLayout(10,10));
-         top.setPreferredSize(new Dimension(0,50));
+         top.setBackground(new Color(17,52,88));
+         top.setPreferredSize(new Dimension(0,70));
+         top.setBorder(BorderFactory.createEmptyBorder(8,20,0,20));
                 
          //greeting 
-         JPanel leftSideTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 2,0));
-         ImageIcon originalIcon = new ImageIcon("pictures/image.jpg");
-         Image scaled = originalIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-         JLabel profile = new JLabel(new ImageIcon(scaled));
-         JLabel greeting = new JLabel(CurrentUser.getName()+ " " + CurrentUser.getLastName());
-         leftSideTop.add(profile);//add the greeting and pfp to the left
-         leftSideTop.add(greeting);
+         JPanel leftSideTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10,0));
+         leftSideTop.setBackground(new Color(17,52,88));
+         JLabel profile = createProfilePicture("/SystemUI/images/default.jpeg",50);
+         JPanel userPanel = new JPanel();
+        userPanel.setLayout(new BoxLayout(userPanel,BoxLayout.Y_AXIS));
+        userPanel.setOpaque(false);
+
+        JLabel welcome = new JLabel("Welcome back,");
+        welcome.setForeground(new Color(215,225,240));
+        welcome.setFont(new Font("Arial",Font.PLAIN,12));
+
+        JLabel greeting = new JLabel(CurrentUser.getName()+" "+CurrentUser.getLastName());
+        greeting.setForeground(Color.WHITE);
+        greeting.setFont(new Font("Arial",Font.BOLD,16));
+
+        userPanel.add(welcome);
+        userPanel.add(greeting);
+
+        leftSideTop.add(profile);
+        leftSideTop.add(userPanel);
          top.add(leftSideTop,BorderLayout.WEST);
          
          //title
          JLabel title = new JLabel("GFH Bank",SwingConstants.CENTER);
          title.setFont(new Font("Arial",Font.BOLD,23));
+         title.setForeground(Color.WHITE);
          top.add(title,BorderLayout.CENTER);//the title IN the panel
          
          //button
          JButton logOut = new JButton("Logout");
          logOut.setPreferredSize(new Dimension(100,40));
+         logOut.setBackground(new Color(18,18,18));
+         logOut.setForeground( Color.WHITE);
+         logOut.setFocusable(false);
+         logOut.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
          logOut.addActionListener(new ActionListener(){
               @Override
               public void actionPerformed(ActionEvent ae){
                  logout();
               }
          });
+         logOut.putClientProperty("JButton.buttonType", "roundRect");
          top.add(logOut,BorderLayout.EAST);
-         
-         //add a separator
-         JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-         sep.setPreferredSize(new Dimension(0,2));
-         top.add(sep,BorderLayout.SOUTH);
-         
+    
          add(top,BorderLayout.NORTH);//the panel itself
     }
     
     private void sidePanel() {
 
+    // =========================================================
+    //                  SIDEBAR COLORS
+    // =========================================================
+    Color panelColor = new Color(24,30,42);
+    Color titleColor = Color.WHITE;
+    Color textColor = new Color(220,220,220);
+    Color secondaryColor = new Color(150,150,150);
+    Color accentBlue = new Color(17,52,88);
+    Color successGreen = new Color(34,197,94);
+
     JPanel leftPanel = new JPanel();
     leftPanel.setPreferredSize(new Dimension(250, 0));
     leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-    leftPanel.setBorder(BorderFactory.createTitledBorder("Recent Activity"));
+    leftPanel.setBackground(panelColor);
+    leftPanel.setBorder(BorderFactory.createEmptyBorder(0,20,20,20));
+
+    // =========================================================
+    //                  SIDEBAR TITLE
+    // =========================================================
+
+    JLabel activityTitle = new JLabel("Recent Activity");
+    activityTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+    activityTitle.setForeground(titleColor);
+
+    leftPanel.add(activityTitle);
+    leftPanel.add(Box.createVerticalStrut(20));
 
     // =========================================================
     //              RECENT TRANSACTIONS
     // =========================================================
 
     txn1 = new JLabel();
+    txn1.setForeground(textColor);
+
     txn1Time = new JLabel();
+    txn1Time.setForeground(secondaryColor);
 
     txn2 = new JLabel();
+    txn2.setForeground(textColor);
+
     txn2Time = new JLabel();
+    txn2Time.setForeground(secondaryColor);
 
     txn3 = new JLabel();
+    txn3.setForeground(textColor);
+
     txn3Time = new JLabel();
+    txn3Time.setForeground(secondaryColor);
 
     // =========================================================
     //                  LAST LOGIN
     // =========================================================
+
     JLabel loginTitle = new JLabel("Last Login");
+    loginTitle.setForeground(titleColor);
+    loginTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
     JLabel loginDate = new JLabel();
+    loginDate.setForeground(textColor);
+
     String loginTime =
-CurrentUser.getLastLogin()
-.toLocalDateTime()
-.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"));
+            CurrentUser.getLastLogin()
+            .toLocalDateTime()
+            .format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"));
 
-String[] parts = loginTime.split(" ", 4);
+    String[] parts = loginTime.split(" ",4);
 
-loginDate.setText(
-    "<html>"
-    + parts[0] + " " + parts[1] + " " + parts[2]
-    + "<br>"
-    + parts[3]
-    + "</html>");
-    
-
+    loginDate.setText(
+            "<html>"
+            + parts[0] + " " + parts[1] + " " + parts[2]
+            + "<br>"
+            + parts[3]
+            + "</html>");
 
     // =========================================================
     //                  ACCOUNT NUMBER
     // =========================================================
 
     JLabel accountTitle = new JLabel("Account Number");
+    accountTitle.setForeground(titleColor);
+    accountTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
     JLabel accountNo = new JLabel(CurrentUser.getAccNum());
+    accountNo.setForeground(textColor);
 
     // =========================================================
     //              DOWNLOAD STATEMENT
     // =========================================================
 
     JButton download = new JButton("Download Statement");
+    download.setBackground(accentBlue);
+    download.setForeground(Color.WHITE);
+    download.putClientProperty("JButton.buttonType","roundRect");
+
     download.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent ae){
-                    accSummary();
-            }
-    
-    
+        @Override
+        public void actionPerformed(ActionEvent ae){
+            accSummary();
+        }
     });
 
     // =========================================================
@@ -215,7 +280,31 @@ loginDate.setText(
     // =========================================================
 
     JLabel statusTitle = new JLabel("System Status");
+    statusTitle.setForeground(titleColor);
+    statusTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
     JLabel status = new JLabel("● Session Active");
+    status.setForeground(successGreen);
+
+    // =========================================================
+    //                  SEPARATORS
+    // =========================================================
+
+    JSeparator sep1 = new JSeparator();
+    sep1.setForeground(accentBlue);
+
+    JSeparator sep2 = new JSeparator();
+    sep2.setForeground(accentBlue);
+
+    JSeparator sep3 = new JSeparator();
+    sep3.setForeground(accentBlue);
+
+    JSeparator sep4 = new JSeparator();
+    sep4.setForeground(accentBlue);
+
+    // =========================================================
+    //                  ADD COMPONENTS
+    // =========================================================
 
     leftPanel.add(txn1);
     leftPanel.add(txn1Time);
@@ -229,29 +318,27 @@ loginDate.setText(
     leftPanel.add(txn3Time);
     leftPanel.add(Box.createVerticalStrut(20));
 
-    leftPanel.add(new JSeparator());
+    leftPanel.add(sep1);
     leftPanel.add(Box.createVerticalStrut(15));
 
     leftPanel.add(loginTitle);
     leftPanel.add(loginDate);
-    //time here
-    
     leftPanel.add(Box.createVerticalStrut(20));
 
-    leftPanel.add(new JSeparator());
+    leftPanel.add(sep2);
     leftPanel.add(Box.createVerticalStrut(15));
 
     leftPanel.add(accountTitle);
     leftPanel.add(accountNo);
     leftPanel.add(Box.createVerticalStrut(20));
 
-    leftPanel.add(new JSeparator());
+    leftPanel.add(sep3);
     leftPanel.add(Box.createVerticalStrut(15));
 
     leftPanel.add(download);
     leftPanel.add(Box.createVerticalStrut(20));
 
-    leftPanel.add(new JSeparator());
+    leftPanel.add(sep4);
     leftPanel.add(Box.createVerticalStrut(15));
 
     leftPanel.add(statusTitle);
@@ -260,7 +347,7 @@ loginDate.setText(
     add(leftPanel, BorderLayout.WEST);
 
     // =========================================================
-    //          LOAD RECENT TRANSACTIONS
+    //          LOAD RECENT TRANSACTIONS (BACKEND)
     // =========================================================
 
     loadRecentActivity();
@@ -285,13 +372,16 @@ loginDate.setText(
     cardPanel = new JPanel(cardLayout);
 
     centerPanel = new JPanel(new GridBagLayout());
+    centerPanel.setBackground(new Color(18,18,18));
+    centerPanel.setBorder(BorderFactory.createEmptyBorder(25,25,25,25));
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(10,10,10,10);
     gbc.anchor = GridBagConstraints.CENTER;
 
     // ===== AVAILABLE BALANCE =====
     balance = new JLabel("Available Balance : KES 0.00");
-    balance.setFont(new Font("Arial", Font.BOLD, 26));
+    balance.setFont(new Font("Segoe UI",Font.BOLD,32));
+    balance.setForeground(Color.WHITE);
 
     gbc.gridx = 0;
     gbc.gridy = 0;
@@ -299,6 +389,10 @@ loginDate.setText(
     centerPanel.add(balance, gbc);
 
     JCheckBox hideBalance = new JCheckBox("Hide Balance");
+        hideBalance.setBackground(new Color(18,18,18));
+        hideBalance.setForeground(new Color(210,210,210));
+        hideBalance.setFocusPainted(false);
+        hideBalance.setFont(new Font("Segoe UI",Font.PLAIN,13));
     hideBalance.addActionListener(new ActionListener(){
     @Override
     public void actionPerformed(ActionEvent ae){
@@ -327,6 +421,7 @@ loginDate.setText(
     gbc.gridwidth = 1;
     gbc.gridx = 0;
     gbc.gridy = 2;
+    styleButton(send);
     centerPanel.add(send, gbc);
 
     JButton request = new JButton("Borrow Money");
@@ -339,6 +434,7 @@ loginDate.setText(
     });
 
     gbc.gridx = 1;
+    styleButton(request);
     centerPanel.add(request, gbc);
 
     JButton pay = new JButton("Deposit");
@@ -353,6 +449,7 @@ loginDate.setText(
 
     gbc.gridx = 0;
     gbc.gridy = 3;
+    styleButton(pay);
     centerPanel.add(pay, gbc);
 
     JButton air = new JButton("Buy Airtime");
@@ -366,11 +463,12 @@ loginDate.setText(
     });
 
     gbc.gridx = 1;
+    styleButton(air);
     centerPanel.add(air, gbc);
 
     // ===== SEPARATOR =====
     JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-
+    sep.setForeground(new Color(60,60,60));
     gbc.gridx = 0;
     gbc.gridy = 4;
     gbc.gridwidth = 2;
@@ -381,8 +479,8 @@ loginDate.setText(
 
     // ===== FINANCIAL SNAPSHOT =====
     JLabel snapshot = new JLabel("Financial Snapshot");
-    snapshot.setFont(new Font("Arial", Font.BOLD, 18));
-
+    snapshot.setFont(new Font("Arial", Font.BOLD, 17));
+    snapshot.setForeground(Color.WHITE);
     gbc.gridy = 5;
     centerPanel.add(snapshot, gbc);
 
@@ -390,8 +488,10 @@ loginDate.setText(
     gbc.anchor = GridBagConstraints.WEST;
 
     JLabel accountType = new JLabel("Account Type");
+    accountType.setForeground(new Color(180,180,180));
     JLabel accountValue = new JLabel(CurrentUser.getAccountType());
-
+    accountValue.setForeground(new Color(70,170,255));
+    accountValue.setFont(new Font("Arial", Font.PLAIN, 12));
     gbc.gridx = 0;
     gbc.gridy = 6;
     centerPanel.add(accountType, gbc);
@@ -400,7 +500,10 @@ loginDate.setText(
     centerPanel.add(accountValue, gbc);
 
     JLabel loanStatus = new JLabel("Loan Status");
+    loanStatus.setForeground(new Color(180,180,180));
     JLabel loanValue = new JLabel();
+    loanValue.setForeground(new Color(70,170,255));
+    loanValue.setFont(new Font("Arial", Font.PLAIN, 12));
     if(CurrentUser.getCurrLoan() == 0.00){
                 loanValue.setText("No active loan");
         }else{
@@ -415,8 +518,10 @@ loginDate.setText(
     centerPanel.add(loanValue, gbc);
 
     JLabel loanLimit = new JLabel("Loan Limit");
+    loanLimit.setForeground(new Color(180,180,180));
     JLabel loanLimitValue = new JLabel("KES " + CurrentUser.getLimit());
-
+    loanLimitValue.setForeground(new Color(70,170,255));
+    loanLimitValue.setFont(new Font("Arial", Font.PLAIN, 12));
     gbc.gridx = 0;
     gbc.gridy = 8;
     centerPanel.add(loanLimit, gbc);
@@ -494,198 +599,179 @@ loginDate.setText(
     
     
     
-   private void showSendPanel() {
+ private void showSendPanel(){
 
     actionPanel.removeAll();
     actionPanel.setLayout(new GridBagLayout());
-    actionPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
-
+    actionPanel.setBackground(Color.WHITE);
+    actionPanel.setBorder(BorderFactory.createEmptyBorder(35,60,35,60));
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(8,10,8,10);
     gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(5,10,5,10);
 
     //=========================================================
     // TITLE
     //=========================================================
 
-    JLabel title = new JLabel("Send Money");
-    title.setFont(new Font("Segoe UI",Font.BOLD,24));
-
+    JLabel title = new JLabel("<html><u>Send Money</u></html>",SwingConstants.CENTER);
+    title.setFont(new Font("Arial",Font.BOLD,28));
+    title.setForeground(Color.BLACK);
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.gridwidth = 4;
-    gbc.anchor = GridBagConstraints.CENTER;
-
+    gbc.insets = new Insets(5,10,35,10);
     actionPanel.add(title,gbc);
 
     //=========================================================
-    // RECIPIENT ACCOUNT
+    // RECIPIENT ACCOUNT LABEL
     //=========================================================
 
-    gbc.gridwidth = 1;
-    gbc.anchor = GridBagConstraints.WEST;
-
-    gbc.gridx = 0;
+    JLabel recipientTitle = new JLabel("  Recipient Account");
+    recipientTitle.setIcon(FontIcon.of(FontAwesomeSolid.USER, 18));
+    recipientTitle.setFont(new Font("Sans Serif",Font.BOLD,10));
+    recipientTitle.setForeground(Color.BLACK);
     gbc.gridy = 1;
-
-    actionPanel.add(
-            new JLabel("Recipient Account"),
-            gbc);
-
-    recipientField = new JTextField(22);
-
-    gbc.gridx = 1;
-    gbc.gridwidth = 3;
-
-    actionPanel.add(
-            recipientField,
-            gbc);
+    gbc.insets = new Insets(5,10,5,10);
+    actionPanel.add(recipientTitle,gbc);
 
     //=========================================================
-    // RECIPIENT DETAILS
+    // RECIPIENT ACCOUNT FIELD
     //=========================================================
+
+    recipientField = new JTextField(25);
+    recipientField.setForeground(Color.black);
+    recipientField.setOpaque(false);
+    recipientField.setBorder(BorderFactory.createMatteBorder(0,0,1,0, new Color(180,180,180)));
+    gbc.gridy = 2;
+    gbc.insets = new Insets(0,10,20,10);
+    actionPanel.add(recipientField,gbc);
+
+  //=========================================================
+ // RECIPIENT / STATUS
+//=========================================================
 
     gbc.gridwidth = 1;
 
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-
-    JLabel recLbl =
-            new JLabel("Recipient");
-
-    recLbl.setFont(
-            new Font("Segoe UI",
-                    Font.BOLD,
-                    13));
-
-    actionPanel.add(recLbl,gbc);
-
-    recipientNameLabel =
-            new JLabel("-");
-
-    recipientNameLabel.setFont(
-            new Font("Segoe UI",
-                    Font.PLAIN,
-                    13));
-
-    gbc.gridx = 1;
-
-    actionPanel.add(
-            recipientNameLabel,
-            gbc);
-
-    //=========================================================
-
-    gbc.gridx = 2;
-
-    JLabel statLbl =
-            new JLabel("Status");
-
-    statLbl.setFont(
-            new Font("Segoe UI",
-                    Font.BOLD,
-                    13));
-
-    actionPanel.add(statLbl,gbc);
-
-    statusLabel =
-            new JLabel("Waiting...");
-
-    statusLabel.setFont(
-            new Font("Segoe UI",
-                    Font.PLAIN,
-                    13));
-
-    gbc.gridx = 3;
-
-    actionPanel.add(
-            statusLabel,
-            gbc);
-
-    //=========================================================
-    // AMOUNT
-    //=========================================================
+    // Recipient label
+    JLabel recLbl = new JLabel("Recipient");
+    recLbl.setFont(new Font("Sans Serif",Font.BOLD,10));
+    recLbl.setForeground(Color.BLACK);
 
     gbc.gridx = 0;
     gbc.gridy = 3;
+    gbc.insets = new Insets(5,10,5,10);
+    actionPanel.add(recLbl,gbc);
 
-    actionPanel.add(
-            new JLabel("Amount (KES)"),
-            gbc);
-
-    sendAmountField =
-            new JTextField(22);
-
+    // Status label
+    JLabel statLbl = new JLabel("Status");
+    statLbl.setFont(new Font("Sans Serif",Font.BOLD,10));
+    statLbl.setForeground(Color.BLACK);
     gbc.gridx = 1;
-    gbc.gridwidth = 3;
+    actionPanel.add(statLbl,gbc);
 
-    actionPanel.add(
-            sendAmountField,
-            gbc);
-
-    //=========================================================
-    // BALANCE
-    //=========================================================
-
-    gbc.gridwidth = 1;
-
+    // Recipient value
+    recipientNameLabel = new JLabel("-");
+    recipientNameLabel.setFont(new Font("Arial",Font.BOLD,14));
+    recipientNameLabel.setForeground(new Color(17,52,88));
     gbc.gridx = 0;
     gbc.gridy = 4;
+    gbc.insets = new Insets(0,10,20,10);
+    actionPanel.add(recipientNameLabel,gbc);
 
-    JLabel balTitle =
-            new JLabel("Available");
-
-    balTitle.setFont(
-            new Font("Segoe UI",
-                    Font.BOLD,
-                    13));
-
-    actionPanel.add(
-            balTitle,
-            gbc);
-
+    // Status value
+    statusLabel = new JLabel("Waiting...");
+    statusLabel.setFont(new Font("Sans Serif",Font.BOLD,10));;
+    statusLabel.setForeground(new Color(17,52,88));
     gbc.gridx = 1;
-
-    JLabel bal =
-            new JLabel("KES "
-            + CurrentUser.getBalance());
-
-    actionPanel.add(
-            bal,
-            gbc);
+    actionPanel.add(statusLabel,gbc);
 
     //=========================================================
-    // BUTTONS
+    // AMOUNT LABEL
     //=========================================================
 
-    JPanel btnPanel =
-            new JPanel(
-                    new FlowLayout(
-                            FlowLayout.CENTER,
-                            20,
-                            0));
+    JLabel amountLbl = new JLabel("  Amount (KES)");
+    amountLbl.setIcon(FontIcon.of(FontAwesomeSolid.MONEY_BILL_WAVE, 18));
+    amountLbl.setFont(new Font("Sans Serif",Font.BOLD,10));
+    amountLbl.setForeground(Color.BLACK);
+    gbc.gridx=0;
+    gbc.gridy = 5;
+    gbc.insets = new Insets(5,10,5,10);
+    actionPanel.add(amountLbl,gbc);
 
-    JButton backBtn =
-            new JButton("Cancel");
+    //=========================================================
+    // AMOUNT FIELD
+    //=========================================================
 
-    sendBtn =
-            new JButton("Send Money");
+    sendAmountField = new JTextField(25);
+    sendAmountField.setForeground(Color.black);
+    sendAmountField.setOpaque(false);
+    sendAmountField.setBorder(BorderFactory.createMatteBorder(0,0,1,0, new Color(180,180,180)));
+    gbc.gridy = 6;
+    gbc.insets = new Insets(0,10,20,10);
+    actionPanel.add(sendAmountField,gbc);
+    
+     //=========================================================
+    // AVAILABLE BALANCE LABEL
+   //=========================================================
 
+    JLabel balTitle = new JLabel("Available Balance");
+    balTitle.setFont(new Font("Arial",Font.BOLD,13));
+    balTitle.setForeground(Color.BLACK);
+    gbc.gridy = 7;
+    gbc.insets = new Insets(5,10,5,10);
+    actionPanel.add(balTitle,gbc);
+
+    //=========================================================
+   // AVAILABLE BALANCE VALUE
+  //=========================================================
+
+    JLabel bal = new JLabel("KES " + CurrentUser.getBalance());
+    bal.setFont(new Font("Arial",Font.BOLD,15));
+    bal.setForeground(new Color(17,52,88));
+    gbc.gridy = 8;
+    gbc.insets = new Insets(0,10,30,10);
+    actionPanel.add(bal,gbc);
+
+    //=========================================================
+    // BUTTON PANEL
+    //=========================================================
+
+    JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,20,0));
+    btnPanel.setBackground(Color.WHITE);
+    JButton backBtn = new JButton("Cancel");
+    backBtn.setPreferredSize(new Dimension(140,42));
+    backBtn.setBackground(new Color(235,235,235));
+    backBtn.setForeground(Color.BLACK);
+    backBtn.setFocusable(false);
+    backBtn.putClientProperty("JButton.buttonType","roundRect");
+    backBtn.putClientProperty("JButton.arc",25);
+    sendBtn = new JButton("Send Money");
+    sendBtn.setPreferredSize(new Dimension(170,42));
+    sendBtn.setBackground(new Color(17,52,88));
+    sendBtn.setForeground(Color.WHITE);
+    sendBtn.setFocusable(false);
+    sendBtn.putClientProperty("JButton.buttonType","roundRect");
+    sendBtn.putClientProperty("JButton.arc",25);
     btnPanel.add(backBtn);
     btnPanel.add(sendBtn);
+    gbc.gridy = 9;
+    gbc.insets = new Insets(20,10,10,10);
+    actionPanel.add(btnPanel,gbc);
 
-    gbc.gridx = 0;
-    gbc.gridy = 5;
-    gbc.gridwidth = 4;
-    gbc.insets = new Insets(25,10,10,10);
+    //=========================================================
+    // EVENTS
+    //=========================================================
 
-    actionPanel.add(
-            btnPanel,
-            gbc);
+    backBtn.addActionListener(new ActionListener(){
 
-    backBtn.addActionListener(e ->
-            cardLayout.show(cardPanel,
-                    "dashboard"));
+        @Override
+        public void actionPerformed(ActionEvent ae){
+
+            cardLayout.show(cardPanel,"dashboard");
+
+        }
+
+    });
 
     sendMoneyLogic();
 
@@ -704,30 +790,30 @@ private void showLoan() {
 
 private void showDepoPanel() {
 
-    // Remove anything currently inside the action panel
     actionPanel.removeAll();
-
-    // Use GridBagLayout just like the rest of the application
     actionPanel.setLayout(new GridBagLayout());
-    actionPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+    actionPanel.setBackground(Color.WHITE);
+    actionPanel.setBorder(BorderFactory.createEmptyBorder(35,60,35,60));
 
-    // GridBagLayout controller
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(15,10,15,10);
     gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(8,10,8,10);
 
     // =========================================================
     //                  PAGE TITLE
     // =========================================================
 
-    JLabel title = new JLabel("Deposit Money");
-    title.setFont(new Font("Arial", Font.BOLD, 24));
+    JLabel title = new JLabel("Deposit Money",SwingConstants.CENTER);
+    title.setFont(new Font("Arial",Font.BOLD,28));
+    title.setForeground(new Color(17,52,88));
 
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
-    actionPanel.add(title, gbc);
+    gbc.insets = new Insets(5,10,35,10);
+
+    actionPanel.add(title,gbc);
 
     // =========================================================
     //          SHOW CURRENT ACCOUNT BALANCE
@@ -736,18 +822,19 @@ private void showDepoPanel() {
     // Later this will read directly from the database.
 
     currentBal = new JLabel("Available Balance");
-    currentBal.setFont(new Font("Arial", Font.BOLD, 15));
-
+    currentBal.setFont(new Font("Arial",Font.BOLD,13));
+    currentBal.setForeground(Color.BLACK);
     gbc.gridy = 1;
-    actionPanel.add(currentBal, gbc);
-
+    gbc.insets = new Insets(5,10,5,10);
+    actionPanel.add(currentBal,gbc);
     JLabel currentAmount = new JLabel("KES " + currentBalance);
-    currentAmount.setFont(new Font("Arial", Font.BOLD, 22));
-
+    currentAmount.setFont(new Font("Arial",Font.BOLD,24));
+    currentAmount.setForeground(new Color(17,52,88));
     gbc.gridy = 2;
-    actionPanel.add(currentAmount, gbc);
+    gbc.insets = new Insets(0,10,25,10);
+    actionPanel.add(currentAmount,gbc);
 
-    // Reset GridBag settings for labels below
+ 
     gbc.gridwidth = 1;
     gbc.anchor = GridBagConstraints.WEST;
 
@@ -756,29 +843,41 @@ private void showDepoPanel() {
     // =========================================================
 
     JLabel amount = new JLabel("Amount (KES)");
-
+    amount.setFont(new Font("Arial",Font.BOLD,13));
+    amount.setForeground(Color.BLACK);
     gbc.gridx = 0;
     gbc.gridy = 3;
-    actionPanel.add(amount, gbc);
+    actionPanel.add(amount,gbc);
 
-    depositAmountField = new JTextField(20);
-    depositAmountField.setFont(new Font("Arial", Font.PLAIN, 18));
+    depositAmountField = new JTextField(25);
+    depositAmountField.setForeground(Color.BLACK);
+    depositAmountField.setFont(new Font("Arial",Font.PLAIN,15));
+    depositAmountField.setOpaque(false);
+    depositAmountField.setBorder(
+    BorderFactory.createMatteBorder(0,0,1,0, new Color(180,180,180)));
 
     gbc.gridx = 1;
-    actionPanel.add(depositAmountField, gbc);
+
+    actionPanel.add(depositAmountField,gbc);
 
     // =========================================================
     //              QUICK AMOUNT BUTTONS
     // =========================================================
-    // Clicking any button automatically fills the amount box.
 
     JPanel quickPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,15,5));
+    quickPanel.setBackground(Color.WHITE);
 
     int[] quickAmounts = {100,500,1000,5000};
 
     for(int amt : quickAmounts){
 
         JButton btn = new JButton("KES " + amt);
+
+        btn.setBackground(new Color(17,52,88));
+        btn.setForeground(Color.WHITE);
+        btn.setFocusable(false);
+        btn.putClientProperty("JButton.buttonType","roundRect");
+        btn.putClientProperty("JButton.arc",25);
 
         btn.addActionListener(new ActionListener(){
 
@@ -799,27 +898,40 @@ private void showDepoPanel() {
     gbc.gridy = 4;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
-    actionPanel.add(quickPanel, gbc);
+    gbc.insets = new Insets(20,10,25,10);
+
+    actionPanel.add(quickPanel,gbc);
 
     // =========================================================
     //                  BUTTON PANEL
     // =========================================================
-    // Deposit is the main action.
-    // Back returns to the dashboard.
 
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,20,10));
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,20,0));
+    buttonPanel.setBackground(Color.WHITE);
 
     depositBtn = new JButton("Deposit");
-    depositBtn.setPreferredSize(new Dimension(140,40));
+    depositBtn.setPreferredSize(new Dimension(160,42));
+    depositBtn.setBackground(new Color(17,52,88));
+    depositBtn.setForeground(Color.WHITE);
+    depositBtn.setFocusable(false);
+    depositBtn.putClientProperty("JButton.buttonType","roundRect");
+    depositBtn.putClientProperty("JButton.arc",25);
 
-    JButton backBtn = new JButton("Back");
-    backBtn.setPreferredSize(new Dimension(140,40));
+    JButton backBtn = new JButton("Cancel");
+    backBtn.setPreferredSize(new Dimension(140,42));
+    backBtn.setBackground(new Color(235,235,235));
+    backBtn.setForeground(Color.BLACK);
+    backBtn.setFocusable(false);
+    backBtn.putClientProperty("JButton.buttonType","roundRect");
+    backBtn.putClientProperty("JButton.arc",25);
 
-    buttonPanel.add(depositBtn);
     buttonPanel.add(backBtn);
+    buttonPanel.add(depositBtn);
 
     gbc.gridy = 5;
-    actionPanel.add(buttonPanel, gbc);
+    gbc.insets = new Insets(20,10,10,10);
+
+    actionPanel.add(buttonPanel,gbc);
 
     // =========================================================
     //                  BACK BUTTON
@@ -837,12 +949,7 @@ private void showDepoPanel() {
     });
 
     depositMoneyLogic();
-    // 1. Validate the amount.
-    // 2. Update the user's balance.
-    // 3. Record the transaction.
-    // 4. Commit if everything succeeds.
-    // 5. Refresh the displayed balance.
-
+    loadBalance();
     
 
     // Refresh the panel so Swing redraws it.
@@ -857,40 +964,50 @@ private void showAirPanel(){
 
     actionPanel.removeAll();
     actionPanel.setLayout(new GridBagLayout());
-    actionPanel.setBorder(BorderFactory.createEmptyBorder(30,50,30,50));
+    actionPanel.setBackground(Color.WHITE);
+    actionPanel.setBorder(BorderFactory.createEmptyBorder(35,60,35,60));
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(15,10,15,10);
     gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(8,10,8,10);
 
-    // =========================================================
-    //                      TITLE
-    // =========================================================
+    //=========================================================
+    // TITLE
+    //=========================================================
 
-    JLabel title = new JLabel("Buy Airtime");
-    title.setFont(new Font("Arial", Font.BOLD, 24));
+    JLabel title = new JLabel("Buy Airtime",SwingConstants.CENTER);
+    title.setFont(new Font("Arial",Font.BOLD,28));
+    title.setForeground(new Color(17,52,88));
 
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
-    actionPanel.add(title, gbc);
+    gbc.insets = new Insets(5,10,35,10);
 
-    // =========================================================
-    //              AVAILABLE BALANCE
-    // =========================================================
+    actionPanel.add(title,gbc);
+
+    //=========================================================
+    // AVAILABLE BALANCE
+    //=========================================================
 
     JLabel available = new JLabel("Available Balance");
-    available.setFont(new Font("Arial", Font.BOLD, 15));
+    available.setFont(new Font("Arial",Font.BOLD,13));
+    available.setForeground(Color.BLACK);
 
     gbc.gridy = 1;
-    actionPanel.add(available, gbc);
+    gbc.insets = new Insets(5,10,5,10);
 
-    JLabel currentBal = new JLabel("KES " + currentBalance);
-    currentBal.setFont(new Font("Arial", Font.BOLD, 22));
+    actionPanel.add(available,gbc);
+
+    currentBal = new JLabel("KES " + currentBalance);
+    currentBal.setFont(new Font("Arial",Font.BOLD,24));
+    currentBal.setForeground(new Color(17,52,88));
 
     gbc.gridy = 2;
-    actionPanel.add(currentBal, gbc);
+    gbc.insets = new Insets(0,10,25,10);
+
+    actionPanel.add(currentBal,gbc);
 
     // =========================================================
     //                  AMOUNT FIELD
@@ -900,41 +1017,58 @@ private void showAirPanel(){
     gbc.anchor = GridBagConstraints.WEST;
 
     JLabel amount = new JLabel("Amount (KES)");
+    amount.setFont(new Font("Arial",Font.BOLD,13));
+    amount.setForeground(Color.BLACK);
 
     gbc.gridx = 0;
     gbc.gridy = 3;
-    actionPanel.add(amount, gbc);
 
-    airtimeAmountField = new JTextField(20);
-    airtimeAmountField.setFont(new Font("Arial", Font.PLAIN, 18));
+    actionPanel.add(amount,gbc);
+
+    airtimeAmountField = new JTextField(25);
+    airtimeAmountField.setFont(new Font("Arial",Font.PLAIN,15));
+    airtimeAmountField.setForeground(Color.BLACK);
+    airtimeAmountField.setOpaque(false);
+    airtimeAmountField.setBorder(
+            BorderFactory.createMatteBorder(
+                    0,0,1,0,
+                    new Color(180,180,180)));
 
     gbc.gridx = 1;
-    actionPanel.add(airtimeAmountField, gbc);
+
+    actionPanel.add(airtimeAmountField,gbc);
 
     // =========================================================
     //              QUICK AMOUNT BUTTONS
     // =========================================================
 
     JPanel quickPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,15,5));
+quickPanel.setBackground(Color.WHITE);
 
-    int[] quickAmounts = {10,20,50,100};
+int[] quickAmounts = {10,20,50,100};
 
-    for(int amt : quickAmounts){
+for(int amt : quickAmounts){
 
-        JButton btn = new JButton("KES " + amt);
+    JButton btn = new JButton("KES " + amt);
 
-        btn.addActionListener(new ActionListener(){
+    btn.setBackground(new Color(17,52,88));
+    btn.setForeground(Color.WHITE);
+    btn.setFocusable(false);
+    btn.putClientProperty("JButton.buttonType","roundRect");
+    btn.putClientProperty("JButton.arc",25);
 
-            @Override
-            public void actionPerformed(ActionEvent ae){
+    btn.addActionListener(new ActionListener(){
 
-                airtimeAmountField.setText(String.valueOf(amt));
+        @Override
+        public void actionPerformed(ActionEvent ae){
 
-            }
+            airtimeAmountField.setText(String.valueOf(amt));
 
-        });
+        }
 
-        quickPanel.add(btn);
+    });
+
+    quickPanel.add(btn);
 
     }
 
@@ -942,25 +1076,40 @@ private void showAirPanel(){
     gbc.gridy = 4;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
-    actionPanel.add(quickPanel, gbc);
+    gbc.insets = new Insets(20,10,25,10);
+
+    actionPanel.add(quickPanel,gbc);
 
     // =========================================================
     //                  BUTTONS
     // =========================================================
 
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,20,10));
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,20,0));
+    buttonPanel.setBackground(Color.WHITE);
 
     buyBtn = new JButton("Buy Airtime");
-    buyBtn.setPreferredSize(new Dimension(150,40));
+    buyBtn.setPreferredSize(new Dimension(170,42));
+    buyBtn.setBackground(new Color(17,52,88));
+    buyBtn.setForeground(Color.WHITE);
+    buyBtn.setFocusable(false);
+    buyBtn.putClientProperty("JButton.buttonType","roundRect");
+    buyBtn.putClientProperty("JButton.arc",25);
 
-    JButton backBtn = new JButton("Back");
-    backBtn.setPreferredSize(new Dimension(150,40));
+    JButton backBtn = new JButton("Cancel");
+    backBtn.setPreferredSize(new Dimension(140,42));
+    backBtn.setBackground(new Color(235,235,235));
+    backBtn.setForeground(Color.BLACK);
+    backBtn.setFocusable(false);
+    backBtn.putClientProperty("JButton.buttonType","roundRect");
+    backBtn.putClientProperty("JButton.arc",25);
 
-    buttonPanel.add(buyBtn);
     buttonPanel.add(backBtn);
+    buttonPanel.add(buyBtn);
 
     gbc.gridy = 5;
-    actionPanel.add(buttonPanel, gbc);
+    gbc.insets = new Insets(20,10,10,10);
+
+    actionPanel.add(buttonPanel,gbc);
 
     // =========================================================
     //                  BACK BUTTON
@@ -1774,6 +1923,46 @@ private void accSummary(){
 
 }
 
+private void styleButton(JButton button){
+
+    button.setBackground(new Color(28,74,122));
+    button.setForeground(Color.WHITE);
+
+    button.setFocusable(false);
+
+    button.putClientProperty("JButton.buttonType", "borderless");
+    button.putClientProperty("JComponent.minimumHeight", 42);
+
+    button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+}
+
     
+private JLabel createProfilePicture(String path,int size){
+
+    Image image = new ImageIcon(path).getImage();
+
+    JLabel profile = new JLabel(){
+
+        @Override
+        protected void paintComponent(Graphics g){
+
+            Graphics2D g2 = (Graphics2D) g.create();
+
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g2.setClip(new java.awt.geom.Ellipse2D.Double(0,0,size,size));
+
+            g2.drawImage(image,0,0,size,size,null);
+
+            g2.dispose();
+        }
+
+    };
+
+    profile.setPreferredSize(new Dimension(size,size));
+
+    return profile;
+}
 
 }

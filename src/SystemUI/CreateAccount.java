@@ -370,6 +370,7 @@ create.setBackground(new Color(17,52,88));;
     create.setFocusable(false);
     create.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 create.setPreferredSize(new Dimension(280,42));
+create.putClientProperty("JButton.buttonType", "roundRect");
 create.addActionListener(this);
 gbc.gridy = 19;
 gbc.insets = new Insets(40,60,20,60);
