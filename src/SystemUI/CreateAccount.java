@@ -3,12 +3,19 @@
 package SystemUI;
 
 import static SystemUI.DatabaseCon.con;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
@@ -24,7 +31,13 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import java.sql.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import org.mindrot.jbcrypt.BCrypt;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
  
 
 public class CreateAccount extends JFrame implements ActionListener{
@@ -39,7 +52,7 @@ public class CreateAccount extends JFrame implements ActionListener{
 
     public CreateAccount() {
         super("Account creation");
-        setSize(900, 700);
+        setSize(950, 900);
        // setDefaultCloseOperation(EXIT_ON_CLOSE);
         
         addWindowListener(new WindowAdapter(){
@@ -55,175 +68,339 @@ public class CreateAccount extends JFrame implements ActionListener{
         });
         
         
-        gbl = new GridBagLayout();
-        setLayout(gbl);
-        gbc = new GridBagConstraints();
-        
-        //Fonts for all components
-        labelFont = new Font("Times New Roman", Font.PLAIN, 13);
-        textFont = new Font("Sans Serif", Font.PLAIN, 13);
-        
-        // Title Label
-        title = new JLabel("Create New Account");
-        title.setFont(new Font("Arial", Font.BOLD, 18)); 
-        gbc.anchor = GridBagConstraints.NORTH;  
-        gbc.gridx = 0; 
-        gbc.gridy = 0; 
-        gbc.gridwidth = 2; 
-        gbc.insets = new Insets(10, 10, 10, 10); 
-        add(title, gbc);
-        
-        // First Name Label
-        firstName = new JLabel("First Name:");
-        firstName.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST; 
-        gbc.gridx = 0; 
-        gbc.gridy = 1; 
-        gbc.gridwidth = 1; // Set to 1 for individual components
-        add(firstName, gbc);
-        
-        // First name text field
-        $firstField = new JTextField(30);
-        $firstField.setFont(textFont);
-        gbc.gridx = 1; // Placing the text field in the second column (right of label)
-        gbc.gridy = 1; 
-       // gbc.fill = GridBagConstraints.HORIZONTAL; // stretches text field  horizontally
-        add($firstField, gbc);
-        
-        // last name Label
-        lastName = new JLabel("Last Name:");
-        lastName.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST; 
-        gbc.gridx = 0; 
-        gbc.gridy = 2; 
-        gbc.gridwidth = 1; // Set to 1 for individual components
-        add(lastName, gbc);
-        
-        //last name text field
-        $secondField = new JTextField(30);
-        $secondField.setFont(textFont);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        add($secondField, gbc);
-        
-        //id label
-        idNo = new JLabel("ID number:");
-        idNo.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 1;
-        add(idNo,gbc);
-        
-        //id textfield
-        $id = new JTextField(30);
-        $id.setFont(textFont);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        add($id,gbc);
-        
-        //email label
-        email = new JLabel("E-mail:");
-        email.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 1;
-        add(email,gbc);
-        
-        //email textfield
-        $email = new JTextField(30);
-        $email.setFont(textFont);
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        add($email,gbc);
-        
-        //kra pin label
-        kra_pin = new JLabel("KRA Pin:");
-        kra_pin.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 1;
-        add(kra_pin,gbc);
-        
-        //kra textfield
-        $kra = new JTextField(30);
-        $kra.setFont(textFont);
-        gbc.gridx = 1;
-        gbc.gridy = 5;
-        gbc.gridwidth = 1;
-        add($kra,gbc);
-                
-        //phone no label
-        phone = new JLabel("Phone number:");
-        phone.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 1;
-        add(phone,gbc);
-                
-        //phone no textfield
-        $phone = new JTextField(30);
-        $phone.setFont(textFont);
-        gbc.gridx = 1;
-        gbc.gridy = 6;
-        add($phone,gbc);
-                
-        //create password label
-        createPassword = new JLabel("Create a new password:");
-        createPassword.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 7;
-        gbc.gridwidth = 1;
-        add(createPassword,gbc);
-        
-        //password creation field
-        $createPass = new JPasswordField(30);
-        gbc.gridx = 1;
-        gbc.gridy = 7;
-        add($createPass,gbc);
-                        
-        //repeat password field
-        repeatPassword = new JLabel("Repeat password:");
-        repeatPassword.setFont(labelFont);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 8;
-        gbc.gridwidth = 1;
-        add(repeatPassword,gbc);
-        
-        //confirm password field 
-        $repeatPass = new JPasswordField(30);
-        gbc.gridx = 1;
-        gbc.gridy = 8;
-        add($repeatPass,gbc);
-        
-        //checkboxes
-           //#1
-        check1 = new JCheckBox("I have read the privacy policy");
-        check1.setFont(textFont);
-        gbc.gridx = 0;
-        gbc.gridy = 9;
-        add(check1,gbc);
-           //#2
-        check2 = new JCheckBox("I agree to the terms and conditions");
-        check2.setFont(textFont);
-        gbc.gridx = 0;
-        gbc.gridy = 10;
-        add(check2,gbc);
-        
-        //creando button
-        create = new JButton("Create account");
-        gbc.gridx = 0;
-        gbc.gridy = 11;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        create.addActionListener(this);
-        add(create,gbc);
-        
-        setVisible(true);
+//========================================
+// MAIN LAYOUT
+//========================================
+
+setLayout(new BorderLayout());
+
+//========================================
+// LEFT PANEL
+//========================================
+
+JPanel leftPanel = new JPanel(new GridBagLayout());
+leftPanel.setPreferredSize(new Dimension(300,950));
+leftPanel.setBackground(new Color(17,52,88));
+GridBagConstraints left =new GridBagConstraints();
+
+left.gridx = 0;
+left.gridy = 0;
+left.weightx = 1;
+left.weighty = 1;
+left.anchor = GridBagConstraints.CENTER;
+
+//========================================
+// IMAGE PLACEHOLDER
+//========================================
+
+JLabel imageLabel = new JLabel();
+
+imageLabel.setPreferredSize(new Dimension(300,950));
+
+imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+
+ImageIcon icon = new ImageIcon(getClass().getResource("/SystemUI/images/bluebg.jpg"));
+
+Image img = icon.getImage().getScaledInstance(500,900,Image.SCALE_SMOOTH);
+
+imageLabel.setIcon(new ImageIcon(img));
+
+
+leftPanel.add(imageLabel,left);
+
+//========================================
+// RIGHT PANEL
+//========================================
+
+JPanel rightPanel =new JPanel();
+
+rightPanel.setLayout(new GridBagLayout());
+
+rightPanel.setBackground(Color.WHITE);
+add(leftPanel,BorderLayout.WEST);
+add(rightPanel,BorderLayout.CENTER);
+
+//========================================
+// GRIDBAG FOR FORM
+//========================================
+
+gbc = new GridBagConstraints();
+gbc.fill =GridBagConstraints.HORIZONTAL;
+gbc.weightx = 1;
+
+//========================================
+// FONTS
+//========================================
+
+labelFont = ( new Font("SansSerif", Font.BOLD,10));
+
+
+//========================================
+// TITLE
+//========================================
+
+title = new JLabel("<html><u>Create New Account</u></html>");
+title.setFont(( new Font("SansSerif", Font.BOLD,26)));
+title.setForeground(new Color(17,52,88));
+title.setHorizontalAlignment(SwingConstants.CENTER);
+gbc.gridx = 0;
+gbc.gridy = 0;
+gbc.gridwidth = 2;
+gbc.insets = new Insets(20,10,30,10);
+gbc.anchor = GridBagConstraints.CENTER;
+
+rightPanel.add(title,gbc);
+
+//========================================
+// FIRST NAME
+//========================================
+
+firstName = new JLabel("  First Name");
+firstName.setIcon(FontIcon.of(FontAwesomeSolid.USER, 18));
+firstName.setFont(labelFont);
+firstName.setForeground(new Color(40,40,40));
+gbc.gridx = 0;
+gbc.gridy = 1;
+gbc.gridwidth = 2;
+gbc.anchor = GridBagConstraints.WEST;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(firstName,gbc);
+
+$firstField = new JTextField(25);
+$firstField.setFont(textFont);
+$firstField.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$firstField.setOpaque(true);
+$firstField.setBackground(Color.WHITE);
+$firstField.setForeground(Color.BLACK);
+$firstField.setCaretColor(new Color(17,52,88));
+gbc.gridy = 2;
+gbc.insets = new Insets(8,60,20,60);
+rightPanel.add($firstField,gbc);
+
+//========================================
+// LAST NAME
+//========================================
+
+lastName = new JLabel("  Last Name");
+lastName.setIcon(FontIcon.of(FontAwesomeSolid.USER, 18));
+lastName.setFont(labelFont);
+lastName.setForeground(new Color(40,40,40));
+gbc.gridy = 3;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(lastName,gbc);
+
+$secondField = new JTextField(25);
+$secondField.setFont(textFont);
+$secondField.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$secondField.setOpaque(true);
+$secondField.setBackground(Color.WHITE);
+$secondField.setForeground(Color.BLACK);
+$secondField.setCaretColor(new Color(17,52,88));
+gbc.gridy = 4;
+gbc.insets = new Insets(8,60,20,60);;
+rightPanel.add($secondField,gbc);
+
+//========================================
+// ID NUMBER
+//========================================
+
+idNo = new JLabel("  National ID");
+idNo.setIcon(FontIcon.of(FontAwesomeSolid.ID_CARD, 18));
+idNo.setFont(labelFont);
+idNo.setForeground(new Color(40,40,40));
+gbc.gridy = 5;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(idNo,gbc);
+
+$id = new JTextField(25);
+$id.setFont(textFont);
+$id.setBorder(BorderFactory.createMatteBorder( 0,0,1,0,new Color(110,110,110)));
+$id.setOpaque(true);
+$id.setBackground(Color.WHITE);
+$id.setForeground(Color.BLACK);
+$id.setCaretColor(new Color(17,52,88));
+gbc.gridy = 6;
+gbc.insets = new Insets(8,60,20,60);;
+rightPanel.add($id,gbc);
+
+//========================================
+// EMAIL
+//========================================
+
+email = new JLabel("  Email Address");
+email.setIcon(FontIcon.of(FontAwesomeSolid.ENVELOPE, 18));
+email.setFont(labelFont);
+email.setForeground(new Color(40,40,40));
+gbc.gridy = 7;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(email,gbc);
+
+$email = new JTextField(25);
+$email.setFont(textFont);
+$email.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$email.setOpaque(true);
+$email.setBackground(Color.WHITE);
+$email.setForeground(Color.BLACK);
+$email.setCaretColor(new Color(17,52,88));
+gbc.gridy = 8;
+gbc.insets = new Insets(8,60,20,60);;
+rightPanel.add($email,gbc);
+
+//========================================
+// KRA PIN
+//========================================
+
+kra_pin = new JLabel("  KRA PIN");
+kra_pin.setIcon(FontIcon.of(FontAwesomeSolid.KEY, 18));
+kra_pin.setFont(labelFont);
+kra_pin.setForeground(new Color(40,40,40));
+gbc.gridy = 9;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(kra_pin,gbc);
+
+$kra = new JTextField(25);
+$kra.setFont(textFont);
+$kra.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$kra.setOpaque(true);
+$kra.setBackground(Color.WHITE);
+$kra.setForeground(Color.BLACK);
+$kra.setCaretColor(new Color(17,52,88));
+gbc.gridy = 10;
+gbc.insets = new Insets(8,60,20,60);;
+rightPanel.add($kra,gbc);
+
+//========================================
+// PHONE NUMBER
+//========================================
+
+phone = new JLabel("  Mobile Number");
+phone.setIcon(FontIcon.of(FontAwesomeSolid.MOBILE_ALT, 18));
+phone.setFont(labelFont);
+phone.setForeground(new Color(40,40,40));
+gbc.gridy = 11;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(phone,gbc);
+
+$phone = new JTextField(25);
+$phone.setFont(textFont);
+$phone.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$phone.setOpaque(true);
+$phone.setBackground(Color.WHITE);
+$phone.setForeground(Color.BLACK);
+$phone.setCaretColor(new Color(17,52,88));
+gbc.gridy = 12;
+gbc.insets = new Insets(8,60,20,60);
+rightPanel.add($phone,gbc);
+
+//========================================
+// PASSWORD
+//========================================
+
+createPassword = new JLabel("  Password");
+createPassword.setIcon(FontIcon.of(FontAwesomeSolid.LOCK, 18));
+createPassword.setFont(labelFont);
+createPassword.setForeground(new Color(40,40,40));
+gbc.gridy = 13;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(createPassword,gbc);
+
+$createPass = new JPasswordField(25);
+$createPass.setFont(textFont);
+$createPass.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$createPass.setOpaque(true);
+$createPass.setBackground(Color.WHITE);
+$createPass.setForeground(Color.BLACK);
+$createPass.setCaretColor(new Color(17,52,88));
+gbc.gridy = 14;
+gbc.insets = new Insets(8,60,20,60);
+rightPanel.add($createPass,gbc);
+
+//========================================
+// CONFIRM PASSWORD
+//========================================
+
+repeatPassword = new JLabel("  Confirm Password");
+repeatPassword.setIcon(FontIcon.of(FontAwesomeSolid.LOCK, 18));
+repeatPassword.setFont(labelFont);
+repeatPassword.setForeground(new Color(40,40,40));
+gbc.gridy = 15;
+gbc.insets = new Insets(5,60,5,0);
+rightPanel.add(repeatPassword,gbc);
+
+$repeatPass = new JPasswordField(25);
+$repeatPass.setFont(textFont);
+$repeatPass.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(110,110,110)));
+$repeatPass.setOpaque(true);
+$repeatPass.setBackground(Color.WHITE);
+$repeatPass.setForeground(Color.BLACK);
+$repeatPass.setCaretColor(new Color(17,52,88));
+gbc.gridy = 16;
+gbc.insets = new Insets(0,60,22,60);
+rightPanel.add($repeatPass,gbc);
+
+//========================================
+// CHECK BOXES
+//========================================
+
+check1 = new JCheckBox("  I have read the Privacy Policy");
+check1.setOpaque(false);
+check1.setFont(textFont);
+check1.setForeground(new Color(40,40,40));
+check1.setFocusable(false);
+gbc.gridy = 17;
+gbc.insets = new Insets(5,60,5,60);
+rightPanel.add(check1, gbc);
+
+check2 = new JCheckBox("I agree to the Terms & Conditions");
+check2.setOpaque(false);
+check2.setFont(textFont);
+check2.setForeground(new Color(40,40,40));
+check2.setFocusable(false);
+gbc.gridy = 18;
+rightPanel.add(check2, gbc);
+
+//========================================
+// CREATE ACCOUNT BUTTON
+//========================================
+
+create = new JButton("  Create Account");
+create.setBackground(new Color(17,52,88));;
+    create.setForeground( Color.WHITE);
+    create.setFocusable(false);
+    create.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+create.setPreferredSize(new Dimension(280,42));
+create.addActionListener(this);
+gbc.gridy = 19;
+gbc.insets = new Insets(40,60,20,60);
+rightPanel.add(create,gbc);
+
+//========================================
+// BACK TO LOGIN
+//========================================
+
+JLabel back = new JLabel("<html><u>Back to Login</u></html>");
+back.setIcon(FontIcon.of(FontAwesomeSolid.ARROW_LEFT, 18));
+back.setForeground(new Color(17,52,88));
+back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+back.addMouseListener(new MouseAdapter() {
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+        new LoginPage();
+
+        dispose();
+
+    }
+});
+gbc.gridy = 20;
+gbc.insets = new Insets(0,60,20,60);
+gbc.anchor = GridBagConstraints.CENTER;
+rightPanel.add(back,gbc);
+
+
+setLocationRelativeTo(null);
+setVisible(true);
     }
 
     /*public static void main(String[] args) {

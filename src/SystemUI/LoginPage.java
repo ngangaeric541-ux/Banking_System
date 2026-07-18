@@ -184,7 +184,7 @@ public class LoginPage extends JFrame implements ActionListener {
     gbc.gridy = 3;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.WEST;
-    gbc.insets = new Insets(0,10,15,10);
+    gbc.insets = new Insets(4,10,15,10);
     rightPanel.add(userField, gbc);
 
     uPass = new JLabel(" Password");
@@ -203,6 +203,7 @@ public class LoginPage extends JFrame implements ActionListener {
     gbc.gridy = 5;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.WEST;
+    gbc.insets = new Insets(4,10,15,10);
     rightPanel.add(passField, gbc);
     
         //========================================
@@ -211,7 +212,7 @@ public class LoginPage extends JFrame implements ActionListener {
 
     login = new JButton("Login");
     login.setPreferredSize( new Dimension(280,42));
-    login.setBackground( new Color(33,150,243));
+    login.setBackground(new Color(17,52,88));
     login.setForeground( Color.WHITE);
     login.setFocusable(false);
     login.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -270,7 +271,7 @@ public class LoginPage extends JFrame implements ActionListener {
     public void mouseExited(MouseEvent e){
 
         login.setBackground(
-                new Color(33,150,243));
+                new Color(17,52,88));
 
     }
 
